@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>सूर्यपुरा ग्राम विकास पोर्टल | हमारा गांव, हमारा विकास, हमारी पहचान</title>
+<meta name="description" content="सूर्यपुरा ग्राम विकास पोर्टल — विकसित गांव, समृद्ध भारत। गांव की सेवाएं, समाचार, विकास कार्य एवं फोटो गैलरी। (Fictional demo)" />
+<meta name="theme-color" content="#123B26" />
+<meta property="og:title" content="सूर्यपुरा ग्राम विकास पोर्टल" />
+<meta property="og:description" content="हमारा गांव, हमारा विकास, हमारी पहचान — डेमो पोर्टल" />
+<meta property="og:type" content="website" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23123B26'/%3E%3Ccircle cx='32' cy='27' r='9' fill='%23F0A04B'/%3E%3Cpath d='M13 44q5 4 10 0t10 0 10 0 10 0' stroke='%23F6F3E8' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3C/svg%3E" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700;800&family=Tiro+Devanagari+Hindi:ital@0;1&family=Yatra+One&display=swap" rel="stylesheet" />
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: { extend: {
+    colors: {
+      ink: '#232B21',
+      brand: {
+        green:'#123B26', deep:'#0B2718', leaf:'#1E5A38',
+        saffron:'#E2711D', saffronDark:'#C05C0C', saffronLight:'#F0A04B',
+        cream:'#FAF7EF', sand:'#E7DFCC', ink:'#232B21'
+      }
+    },
+    fontFamily: {
+      display:['"Yatra One"','serif'],
+      body:['Mukta','sans-serif'],
+      serifhi:['"Tiro Devanagari Hindi"','serif']
+    },
+    keyframes: { pop: { '0%': { opacity:'0', transform:'translateY(8px)' }, '100%': { opacity:'1', transform:'translateY(0)' } } },
+    animation: { pop: 'pop .22s ease-out both' }
+  }}
+};
+</script>
+
+<style>
+  html { scroll-behavior: smooth; }
+  body { overflow-x: clip; }
+  ::selection { background:#E2711D; color:#fff; }
+  :focus-visible { outline:2px solid #E2711D; outline-offset:2px; }
+  .no-scrollbar::-webkit-scrollbar { display:none; }
+  .no-scrollbar { scrollbar-width:none; }
+  img { -webkit-user-drag:none; user-select:none; }
+  /* Devanagari-safe line clamps (version independent) */
+  .clamp-1{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+  .clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .clamp-3{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  /* matras (ािीं) need headroom — avoid clipped ascenders in display type */
+  h1,h2,h3,.font-display { line-height:1.22; }
+</style>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
+</head>
+
+<body class="bg-brand-cream text-ink font-body antialiased">
+<div id="root">
+  <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#FAF7EF;color:#123B26;font-family:Mukta,sans-serif;letter-spacing:.05em">सूर्यपुरा लोड हो रहा है…</div>
+</div>
+<noscript><div style="padding:2rem;font-family:sans-serif;background:#FAF7EF;color:#123B26">इस पोर्टल को देखने के लिए जावास्क्रिप्ट सक्षम करें।</div></noscript>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef } = React;
+
+/* ============================================================
+   IMAGE CONFIGURATION — एक ही जगह, आसानी से बदलें
+   sources[0] पहले आज़माया जाता है; error पर अगला — अंतिम
+   entry हमेशा रेंडर होती है, इसलिए तस्वीर कभी टूटी नहीं दिखेगी।
+   ============================================================ */
+const U = (id, w, h) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&h=${h}&q=80`;
+const P = (seed, w, h) => `https://picsum.photos/seed/${seed}/${w}/${h}`;
+
+const IMAGES = {
+  hero: {
+    alt: 'सूर्यपुरा गांव का सुनहरी रोशनी में दृश्य — हरे-भरे खेत और ग्रामीण परिवेश',
+    sources: [U('1500382017468-9049fed747ef',1920,1080), U('1469474968028-56623f02e42e',1920,1080), U('1470071459604-3b5ec3a7fe05',1920,1080), P('suryapura-hero',1920,1080)]
+  },
+  leader: {
+    alt: 'सूर्यपुरा के ग्राम विकास दूत — काल्पनिक पात्र का चित्र (डेमो)',
+    sources: [U('1560250097-0b93528c311a',700,933), U('1507003211169-0a1dd7228f2d',700,933), P('suryapura-doot',700,933)]
+  },
+  village: {
+    alt: 'भारतीय ग्रामीण गांव सूर्यपुरा का दृश्य — हरियाली और खेत',
+    sources: [U('1464226184884-fa280b88c313',1400,875), U('1447752875215-b2761acb3c5d',1400,875), P('suryapura-gaon',1400,875)]
+  },
+  farmer: {
+    alt: 'हरे-भरे खेत में काम करते भारतीय किसान',
+    sources: [U('1589923188900-85dae523342b',900,675), U('1592982537447-744d388c9108',900,675), U('1523348837708-15d4a09cfac2',900,675), P('suryapura-kisan',900,675)]
+  },
+  school: {
+    alt: 'सूर्यपुरा के सरकारी स्कूल में पढ़ते ग्रामीण बच्चे',
+    sources: [U('1503676260728-1c00da094a0b',900,675), U('1509062522246-3755977927d7',900,675), U('1427504494785-3a9ca7044f45',900,675), P('suryapura-school',900,675)]
+  },
+  road: {
+    alt: 'सूर्यपुरा में बनी नई पक्की ग्रामीण सड़क',
+    sources: [U('1449824913935-59a10b8d2000',1200,800), U('1503387762-592deb58ef4e',1200,800), P('suryapura-sadak',1200,800)]
+  },
+  panchayat: {
+    alt: 'सूर्यपुरा की ग्राम पंचायत बैठक — गांव के लोग साझा निर्णय लेते हुए',
+    sources: [U('1517245386807-bb43f82c33c4',1000,750), U('1529156069898-49953e39b3ac',1000,750), U('1521791136064-7986c2920216',1000,750), P('suryapura-panchayat',1000,750)]
+  },
+  agriculture: {
+    alt: 'भारतीय कृषि — हरी फसलों से भरा खेत',
+    sources: [U('1500937386664-56d1dfef3854',1000,750), U('1516467508483-a7212febe31a',1000,750), U('1625246333195-78d9c38ad449',1000,750), P('suryapura-kheti',1000,750)]
+  },
+  water: {
+    alt: 'गांव के लिए स्वच्छ पेयजल की व्यवस्था',
+    sources: [U('1523362628745-0c100150b504',1000,750), U('1506744038136-46273834b3fb',1000,750), P('suryapura-jal',1000,750)]
+  },
+  digital: {
+    alt: 'डिजिटल पंचायत सेवा-केंद्र — कंप्यूटर पर ऑनलाइन रिकॉर्ड',
+    sources: [U('1498050108023-c5249f4df085',1000,750), U('1517245386807-bb43f82c33c4',1000,750), P('suryapura-digital',1000,750)]
+  },
+  skills: {
+    alt: 'ग्रामीण युवाओं का कौशल प्रशिक्षण सत्र',
+    sources: [U('1543269865-cbf427effbad',1000,750), U('1521791136064-7986c2920216',1000,750), P('suryapura-rozgar',1000,750)]
+  },
+  newsRoad: {
+    alt: 'सूर्यपुरा में नई सड़क निर्माण कार्य की तस्वीर',
+    sources: [U('1503387762-592deb58ef4e',900,600), U('1449824913935-59a10b8d2000',900,600), P('news-sadak',900,600)]
+  },
+  newsDigital: {
+    alt: 'पंचायत का नया डिजिटल सेवा केंद्र',
+    sources: [U('1498050108023-c5249f4df085',900,600), U('1517245386807-bb43f82c33c4',900,600), P('news-digital',900,600)]
+  },
+  newsSchool: {
+    alt: 'स्कूल के बच्चों को जिला स्तर पर सम्मान मिलते हुए',
+    sources: [U('1509062522246-3755977927d7',900,600), U('1503676260728-1c00da094a0b',900,600), P('news-school',900,600)]
+  },
+  socialFarmer: {
+    alt: 'खुशहाल किसान अभियान — खेत में मुस्कुराते भारतीय किसान',
+    sources: [U('1523348837708-15d4a09cfac2',900,900), U('1589923188900-85dae523342b',900,900), P('kisan-post',900,900)]
+  },
+  socialSchool: {
+    alt: 'शिक्षित बच्चे उज्ज्वल कल अभियान — स्कूल के ग्रामीण बच्चे',
+    sources: [U('1509062522246-3755977927d7',900,900), U('1427504494785-3a9ca7044f45',900,900), P('shiksha-post',900,900)]
+  },
+  socialDev: {
+    alt: 'विकास की राह पर सूर्यपुरा अभियान — गांव की नई सड़क',
+    sources: [U('1465447142348-e9952c393450',900,900), U('1449824913935-59a10b8d2000',900,900), U('1503387762-592deb58ef4e',900,900), P('vikas-post',900,900)]
+  }
+};
+
+/* गैलरी — अलग-अलग तस्वीरें, अलग-अलग कैप्शन */
+const GALLERY = [
+  { img: { alt:'गांव का सुनहरा दृश्य — खेत और आकाश', sources:[U('1441974231531-c6227db76b6e',1000,1000), U('1470071459604-3b5ec3a7fe05',1000,1000), P('gal-village',1000,1000)] }, caption:'गांव का सुनहरा दृश्य', span:'col-span-2 row-span-2' },
+  { img: { alt:'खेत में काम करते किसान', sources:[U('1453928582365-b6ad33cb77ee',800,800), U('1523348837708-15d4a09cfac2',800,800), P('gal-kisan',800,800)] }, caption:'खेत में किसान', span:'' },
+  { img: { alt:'विद्यालय के बच्चे कक्षा में', sources:[U('1427504494785-3a9ca7044f45',800,800), U('1497633762265-9d59a9e4d25f',800,800), P('gal-school',800,800)] }, caption:'विद्यालय के बच्चे', span:'' },
+  { img: { alt:'गांव की नई पक्की सड़क', sources:[U('1541888946425-d81bb19240f5',800,800), U('1449824913935-59a10b8d2000',800,800), P('gal-sadak',800,800)] }, caption:'नई पक्की सड़क', span:'' },
+  { img: { alt:'पंचायत बैठक में गांव के लोग', sources:[U('1469571486292-0ba58a3f068b',800,800), U('1521791136064-7986c2920216',800,800), P('gal-panchayat',800,800)] }, caption:'पंचायत बैठक', span:'' },
+  { img: { alt:'हरी-भरी खेती का दृश्य', sources:[U('1447752875215-b2761acb3c5d',1000,500), U('1625246333195-78d9c38ad449',1000,500), P('gal-kheti',1000,500)] }, caption:'हरी-भरी खेती', span:'md:col-span-2' },
+  { img: { alt:'गांव का मेला — सामुदायिक आयोजन', sources:[U('1514525253161-7a46d19cd819',800,800), U('1529156069898-49953e39b3ac',800,800), P('gal-mela',800,800)] }, caption:'गांव का मेला', span:'' },
+  { img: { alt:'गांव में चल रहा विकास कार्य', sources:[U('1503387762-592deb58ef4e',800,800), U('1541888946425-d81bb19240f5',800,800), P('gal-vikas',800,800)] }, caption:'विकास कार्य जारी', span:'' }
+];
+
+/* ============================================================
+   CONTENT DATA
+   ============================================================ */
+const NAV = [
+  { label:'होम', id:'home' },
+  { label:'हमारा गांव', id:'village' },
+  { label:'ग्राम पंचायत', id:'panchayat' },
+  { label:'विकास कार्य', id:'projects' },
+  { label:'शिक्षा', id:'shiksha' },
+  { label:'किसान', id:'kisan' },
+  { label:'समाचार', id:'samachar' },
+  { label:'फोटो गैलरी', id:'gallery' },
+  { label:'संपर्क करें', id:'contact' }
+];
+
+const SEARCH = [
+  { id:'village',   label:'हमारा गांव',   kw:['गांव','गाव','ग्राम','सूर्यपुरा','village','परंपरा'] },
+  { id:'panchayat', label:'ग्राम पंचायत', kw:['पंचायत','सरपंच','बैठक','सभा','sarpanch'] },
+  { id:'projects',  label:'विकास कार्य',  kw:['विकास','परियोजना','सड़क','पक्की','योजना','road'] },
+  { id:'kisan',     label:'कृषि एवं किसान', kw:['किसान','खेती','कृषि','फसल','सिंचाई','farmer','बाजरा','गेहूं','सरसों'] },
+  { id:'shiksha',   label:'शिक्षा',       kw:['शिक्षा','स्कूल','विद्यालय','बच्चे','पढ़ाई','school','छात्रवृत्ति'] },
+  { id:'samachar',  label:'समाचार',       kw:['समाचार','न्यूज','खबर','news'] },
+  { id:'gallery',   label:'फोटो गैलरी',   kw:['फोटो','गैलरी','तस्वीर','photo'] },
+  { id:'social',    label:'सोशल मीडिया',  kw:['सोशल','इंस्टाग्राम','instagram','पोस्ट'] },
+  { id:'contact',   label:'संपर्क',       kw:['संपर्क','फोन','ईमेल','पता','contact','शिकायत'] },
+  { id:'home',      label:'होम',          kw:['होम','home','मुख्य'] }
+];
+
+const QUICK = [
+  { icon:'sprout',     title:'किसान',        desc:'खुशहाल किसान, समृद्ध गांव',   target:'kisan' },
+  { icon:'graduation', title:'शिक्षा',        desc:'हर बच्चे का हक, बेहतर भविष्य', target:'shiksha' },
+  { icon:'road',       title:'सड़क विकास',    desc:'बेहतर सड़क, बेहतर अवसर',      target:'projects' },
+  { icon:'landmark',   title:'ग्राम पंचायत',  desc:'जन सेवा, जन सहभागिता',        target:'panchayat' },
+  { icon:'briefcase',  title:'विकास कार्य',   desc:'आज का प्रयास, कल का समृद्ध गांव', target:'projects' }
+];
+
+const STATS = [
+  { icon:'users',      value:'2,850', label:'कुल जनसंख्या' },
+  { icon:'home',       value:'520',   label:'कुल परिवार' },
+  { icon:'graduation', value:'1',     label:'सरकारी विद्यालय' },
+  { icon:'sprout',     value:'850+',  label:'किसान परिवार' }
+];
+
+const VILLAGE_FACTS = [
+  { icon:'mapPin', label:'कुल क्षेत्रफल',   value:'12.6 वर्ग किमी' },
+  { icon:'home',   label:'बस्तियां / वार्ड', value:'4 मुख्य बस्तियां' },
+  { icon:'sprout', label:'मुख्य फसलें',      value:'बाजरा · गेहूं · सरसों' },
+  { icon:'road',   label:'निकटतम कस्बा',    value:'सांगानेर (14 किमी)' }
+];
+
+const NEWS = [
+  { title:'सूर्यपुरा में नई सड़क का उद्घाटन', date:'05 सितंबर 2026', tag:'विकास कार्य', img:IMAGES.newsRoad,
+    excerpt:'पंचायत की ₹48.2 लाख की परियोजना से चार बस्तियों के 520 परिवारों को स्कूल, मंडी और अस्पताल तक सीधी पहुंच मिलेगी।',
+    body:['ग्राम पंचायत सूर्यपुरा की ₹48.2 लाख की लागत से बनी 3.2 किमी लंबी पक्की सड़क का लोकार्पण जिला पंचायत सदस्य की उपस्थिति में किया गया। इस सड़क से गांव की चार बस्तियों के लगभग 520 परिवारों को स्कूल, सामुदायिक स्वास्थ्य केंद्र और सांगानेर मंडी तक सीधी पहुंच मिलेगी।','सड़क के साथ दो नई पुलियाओं का निर्माण भी पूरा किया गया है, और मार्ग पर 18 सोलर स्ट्रीट लाइट लगाई गई हैं। प्रधान ने बताया कि बरसात में गांव दो दिन तक कटा रहता था — अब वह समस्या हमेशा के लिए खत्म हो गई है।'] },
+  { title:'ग्राम पंचायत ने शुरू की डिजिटल सेवा', date:'02 सितंबर 2026', tag:'डिजिटल पंचायत', img:IMAGES.newsDigital,
+    excerpt:'पंचायत भवन के नए सेवा-केंद्र पर आधार, पेंशन, राशन कार्ड व भू-रिकॉर्ड से जुड़ी 18 सेवाएं ऑनलाइन मिलेंगी।',
+    body:['पंचायत भवन में खोले गए नए डिजिटल सेवा-केंद्र पर अब आधार अपडेट, वृद्धावस्था पेंशन, राशन कार्ड और भू-खसरा रिकॉर्ड से जुड़ी 18 सेवाएं ऑनलाइन मिलेंगी। केंद्र में दो कंप्यूटर, प्रिंटर और मुफ्त वाई-फाई की सुविधा उपलब्ध है।','फॉर्म भरने में ग्रामवासियों की मदद के लिए एक संचालक भी तैनात किया गया है। अब तक 240 ग्रामवासियों ने घर छोड़े बिना अपने दस्तावेज़ी काम पूरे किए हैं।'] },
+  { title:'स्कूल के बच्चों ने जीता जिला स्तर पर सम्मान', date:'28 अगस्त 2026', tag:'शिक्षा', img:IMAGES.newsSchool,
+    excerpt:'जिला स्तरीय विज्ञान प्रदर्शनी में सूर्यपुरा विद्यालय की टीम ने सौर-ऊर्जा सिंचाई मॉडल पर प्रथम पुरस्कार जीता।',
+    body:['जिला स्तरीय विज्ञान प्रदर्शनी में सरकारी उच्च प्राथमिक विद्यालय सूर्यपुरा की छात्राओं की टीम ने “सौर ऊर्जा से चलने वाला सिंचाई मॉडल” पर प्रथम पुरस्कार जीता। टीम को प्रशस्ति-पत्र के साथ ₹5,100 की राशि दी गई।','प्रधान ने इस उपलब्धि के सम्मान में विद्यालय में नई विज्ञान लैब की घोषणा की है, जो अगले सत्र से कार्यशील होगी। स्मार्ट क्लास से तैयार हुई टीम के लिए यह लगातार तीसरा जिला-स्तरीय सम्मान है।'] }
+];
+
+const STATUS_STYLE = {
+  done:  'bg-[#E4EFE2] text-brand-green border-[#C8DEC3]',
+  going: 'bg-[#FCEBD9] text-brand-saffronDark border-[#F2D5AA]',
+  plan:  'bg-[#EEECE3] text-brand-ink/70 border-[#D9D4C2]'
+};
+
+const PROJECTS = [
+  { num:'01', title:'सड़क एवं परिवहन', icon:'road', statusType:'done', status:'पूर्ण', img:IMAGES.road, progress:100,
+    desc:'3.2 किमी पक्की सड़क व दो नई पुलियाएं — चारों बस्तियों की सीधी पहुंच।',
+    meta:{ लागत:'₹48.2 लाख', लाभान्वित:'520 परिवार', अवधि:'मार्च – सितंबर 2026', विभाग:'पंचायत समिति · PMGSY' },
+    body:'सूर्यपुरा की सबसे बड़ी बस्ती से मुख्य मार्ग तक 3.2 किमी लंबी पक्की सड़क बनाई गई है, जिस पर दो नई पुलियाओं का निर्माण भी शामिल है। इससे बच्चों का विद्यालय आना, किसानों की फसल मंडी तक पहुंचाना और एम्बुलेंस सेवा आसान हो गई है। सड़क के किनारे 18 सोलर स्ट्रीट लाइट भी लगाई गई हैं।' },
+  { num:'02', title:'शिक्षा एवं डिजिटल लर्निंग', icon:'graduation', statusType:'going', status:'चालू', img:IMAGES.school, progress:70,
+    desc:'स्मार्ट क्लास, डिजिटल लाइब्रेरी व मेधावी छात्रवृत्ति योजना।',
+    meta:{ लागत:'₹22 लाख', लाभान्वित:'380 बच्चे', अवधि:'2025 – 2027', विभाग:'शिक्षा विभाग · पंचायत' },
+    body:'विद्यालय में दो स्मार्ट क्लास लगाई गई हैं और 40 टैबलेट उपलब्ध कराए गए हैं। छठी से आठवीं के बच्चों के लिए डिजिटल लाइब्रेरी शुरू हुई है, जबकि मेधावी बच्चों को ₹500 प्रति माह छात्रवृत्ति मिल रही है। इस वर्ष 26 बच्चों ने जिला स्तरीय प्रतियोगिताओं में सम्मान जीता है।' },
+  { num:'03', title:'कृषि एवं सिंचाई', icon:'sprout', statusType:'going', status:'चालू', img:IMAGES.agriculture, progress:55,
+    desc:'पांच नई बोरिंग, 120 एकड़ पर ड्रिप सिंचाई व बीज-सहायता शिविर।',
+    meta:{ लागत:'₹67 लाख', लाभान्वित:'850 किसान परिवार', अवधि:'2026 – 2027', विभाग:'कृषि विभाग' },
+    body:'गांव के पांच वार्डों में नई बोरिंग और 120 एकड़ क्षेत्र में ड्रिप सिंचाई लगाई जा रही है, जिससे पानी की लगभग 40% बचत होगी। बीज व उर्वरक सहायता शिविर में इस वर्ष 610 किसानों को लाभ मिला। सरसों व बाजरा की उन्नत किस्म की बुवाई 60% खेतों तक पहुंच चुकी है।' },
+  { num:'04', title:'स्वच्छता एवं पेयजल', icon:'droplet', statusType:'going', status:'चालू', img:IMAGES.water, progress:85,
+    desc:'शौचालय, नल-जल संयंत्र व तीन वर्षा-जल संचयन टैंक।',
+    meta:{ लागत:'₹35.6 लाख', लाभान्वित:'520 परिवार', अवधि:'2025 – 2026', विभाग:'जल शक्ति मिशन' },
+    body:'हर-घर-नल-जल के तहत 100% परिवारों तक नल पहुंचाने का कार्य पूरा हो चुका है। पंचायत भवन व विद्यालय पर दो वर्षा-जल संचयन टैंक बने हैं, और गांव में तीन स्वच्छता भवन के साथ दैनिक सफाई हेतु आठ स्वच्छता मित्र तैनात हैं।' },
+  { num:'05', title:'डिजिटल पंचायत', icon:'wifi', statusType:'done', status:'पूर्ण', img:IMAGES.digital, progress:100,
+    desc:'ऑनलाइन रिकॉर्ड, ई-सेवा केंद्र व मुफ्त ग्राम-वाई-फाई।',
+    meta:{ लागत:'₹12.4 लाख', लाभान्वित:'2,850 ग्रामवासी', अवधि:'पूर्ण — जुलाई 2026', विभाग:'डिजिटल इंडिया' },
+    body:'पंचायत के सभी रिकॉर्ड — जन्म-मृत्यु पंजी, भू-खसरा और राशन सूची — अब डिजिटल हो गए हैं। सेवा-केंद्र पर 18 प्रकार की ऑनलाइन सेवाएं मिलती हैं और गांव के तीन सार्वजनिक स्थानों पर मुफ्त वाई-फाई उपलब्ध है।' },
+  { num:'06', title:'रोजगार एवं कौशल विकास', icon:'briefcase', statusType:'plan', status:'प्रस्तावित', img:IMAGES.skills, progress:12,
+    desc:'कौशल प्रशिक्षण केंद्र, स्वरोजगार सहायता व मनरेगा कार्य।',
+    meta:{ लागत:'₹28 लाख (प्रस्तावित)', लाभान्वित:'240 ग्रामीण युवा', अवधि:'2027 से', विभाग:'मनरेगा · स्किल इंडिया' },
+    body:'प्रशिक्षण केंद्र में सिलाई, मोबाइल रिपेयर, सौर तंत्र और डिजिटल सेवा जैसे चार कोर्स शुरू होंगे। स्वरोजगार हेतु युवाओं को ₹25,000 तक की सहायता मिलेगी। पिछले वर्ष मनरेगा में गांव में 3.1 लाख मन-दिनों का कार्य सृजित हुआ था।' }
+];
+
+const SOCIAL_POSTS = [
+  { img:IMAGES.socialFarmer, h1:'खुशहाल किसान', h2:'समृद्ध सूर्यपुरा',
+    sub:'आधुनिक खेती, बेहतर आय, मजबूत भविष्य।', tags:'#Kisan #Suryapura #ViksitGaon', likes:1248, time:'2 दिन पहले' },
+  { img:IMAGES.socialSchool, h1:'शिक्षित बच्चे', h2:'उज्ज्वल कल',
+    sub:'हर बच्चे की शिक्षा, सूर्यपुरा की प्रगति।', tags:'#Shiksha #Suryapura #BetterTomorrow', likes:986, time:'5 दिन पहले' },
+  { img:IMAGES.socialDev, h1:'विकास की राह पर', h2:'सूर्यपुरा',
+    sub:'बेहतर सुविधाएं, बेहतर अवसर।', tags:'#Vikas #Suryapura #RuralDevelopment', likes:1502, time:'1 सप्ताह पहले' }
+];
+
+const AGENDA = [
+  'नवंबर माह में हर-घर-नल-जल कार्य की प्रगति की समीक्षा',
+  'विद्यालय परिसर में दो नए शौचालयों की स्वीकृति',
+  'मनरेगा जॉब कार्डों का नवीनीकरण व नए पंजीकरण',
+  'मुख्य चौपाल से विद्यालय तक पांच नई सोलर स्ट्रीट लाइट',
+  'वार्ड 3 में सड़क किनारे नाली निर्माण की प्राथमिकता'
+];
+
+/* ============================================================
+   ICONS — inline SVG set (Feather/Lucide style, stroke based)
+   ============================================================ */
+const ICONS = {
+  search:     <g><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></g>,
+  menu:       <g><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></g>,
+  x:          <g><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></g>,
+  arrowRight: <g><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></g>,
+  arrowUp:    <g><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></g>,
+  chevronRight:<g><polyline points="9 18 15 12 9 6"/></g>,
+  chevronLeft:<g><polyline points="15 18 9 12 15 6"/></g>,
+  play:       <polygon points="5 3 19 12 5 21 5 3"/>,
+  phone:      <g><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></g>,
+  mail:       <g><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,6 12,13 2,6"/></g>,
+  mapPin:     <g><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></g>,
+  clock:      <g><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></g>,
+  calendar:   <g><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></g>,
+  heart:      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>,
+  message:    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>,
+  share2:     <g><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></g>,
+  bookmark:   <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>,
+  instagram:  <g><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></g>,
+  facebook:   <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>,
+  youtube:    <g><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-1.92 29 29 0 0 0 .46-5.33 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></g>,
+  twitter:    <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>,
+  sprout:     <g><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/></g>,
+  graduation: <g><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2.5 9 2.5 12 0v-5"/></g>,
+  road:       <g><path d="M5 21 11 3"/><path d="M19 21 13 3"/><path d="M12 7.5v2"/><path d="M12 12.5v2"/><path d="M12 17.5v2"/></g>,
+  landmark:   <g><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></g>,
+  briefcase:  <g><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></g>,
+  droplet:    <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>,
+  wifi:       <g><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></g>,
+  send:       <g><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></g>,
+  check:      <polyline points="20 6 9 17 4 12"/>,
+  users:      <g><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></g>,
+  award:      <g><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></g>,
+  more:       <g><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></g>,
+  sun:        <g><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></g>,
+  home:       <g><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></g>,
+  camera:     <g><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></g>,
+  newspaper:  <g><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></g>,
+  book:       <g><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></g>,
+  maximize:   <g><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></g>
+};
+
+function Icon({ name, size = 20, className = '', filled = false, strokeWidth = 2 }) {
+  const content = ICONS[name];
+  if (!content) return null;
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
+      strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round"
+      className={className} aria-hidden="true">
+      {content}
+    </svg>
+  );
+}
+
+/* ============================================================
+   SHARED COMPONENTS
+   ============================================================ */
+
+/* Real image with automatic fallback chain — never shows a broken box */
+function SmartImage({ img, className = '', fit = 'cover', eager = false }) {
+  const [idx, setIdx] = useState(0);
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => { setIdx(0); setLoaded(false); }, [img]);
+  const src = img.sources[idx];
+  if (!src) {
+    return (
+      <div className={`bg-brand-green flex items-center justify-center ${className}`} role="img" aria-label={img.alt}>
+        <div className="text-center px-3">
+          <Icon name="sun" size={26} className="mx-auto text-brand-saffronLight" />
+          <p className="text-white/80 text-[11px] mt-1 font-display tracking-wide">सूर्यपुरा</p>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <img key={src} src={src} alt={img.alt} loading={eager ? 'eager' : 'lazy'} decoding="async" draggable={false}
+      onLoad={() => setLoaded(true)}
+      onError={() => setIdx(i => i + 1)}
+      className={`${fit === 'contain' ? 'object-contain' : 'object-cover'} transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'} ${className}`} />
+  );
+}
+
+/* Portal emblem — rising sun over green fields */
+function Emblem({ size = 44, className = '' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" className={className} role="img"
+      aria-label="सूर्यपुरा प्रतीक — उगता सूर्य और हरे खेत">
+      <circle cx="32" cy="32" r="30" fill="#123B26" />
+      <circle cx="32" cy="27" r="8.5" fill="#F0A04B" />
+      <g stroke="#F0A04B" strokeWidth="2.5" strokeLinecap="round">
+        <line x1="32" y1="14" x2="32" y2="9.5" />
+        <line x1="41.5" y1="17.5" x2="44.7" y2="14.3" />
+        <line x1="22.5" y1="17.5" x2="19.3" y2="14.3" />
+        <line x1="42.5" y1="27" x2="47" y2="27" />
+        <line x1="21.5" y1="27" x2="17" y2="27" />
+      </g>
+      <g stroke="#F6F3E8" strokeWidth="2.5" strokeLinecap="round" fill="none">
+        <path d="M13 42q5 4.5 10 0t10 0 10 0 10 0" />
+        <path d="M11 50q5 4.5 10 0t10 0 10 0 10 0" />
+      </g>
+    </svg>
+  );
+}
+
+/* Village welcome signboard — designed SVG asset */
+function SignBoard({ className = 'w-60' }) {
+  return (
+    <svg viewBox="0 0 360 250" className={className} role="img"
+      aria-label="सूर्यपुरा गांव का स्वागत बोर्ड — हमारा गांव, हमारी पहचान">
+      <ellipse cx="62" cy="248" rx="14" ry="3" fill="#123B26" opacity="0.15" />
+      <ellipse cx="298" cy="248" rx="14" ry="3" fill="#123B26" opacity="0.15" />
+      <rect x="56" y="150" width="12" height="96" rx="2" fill="#6E786B" />
+      <rect x="292" y="150" width="12" height="96" rx="2" fill="#6E786B" />
+      <rect x="60" y="150" width="4" height="96" fill="#8C9789" opacity="0.7" />
+      <rect x="296" y="150" width="4" height="96" fill="#8C9789" opacity="0.7" />
+      <rect x="24" y="42" width="320" height="120" rx="12" fill="#0B2718" />
+      <rect x="18" y="34" width="320" height="120" rx="12" fill="#123B26" stroke="#0B2718" strokeWidth="4" />
+      <rect x="29" y="46" width="7" height="32" fill="#E2711D" />
+      <rect x="29" y="78" width="7" height="32" fill="#F6F3E8" />
+      <rect x="29" y="110" width="7" height="32" fill="#1E5A38" />
+      <rect x="44" y="44" width="282" height="100" rx="8" fill="none" stroke="#E2711D" strokeWidth="2" />
+      <text x="196" y="88" textAnchor="middle" fontFamily="'Yatra One', serif" fontSize="33" fill="#F6F3E8">सूर्यपुरा</text>
+      <text x="196" y="118" textAnchor="middle" fontFamily="Mukta, sans-serif" fontWeight="600" fontSize="15" fill="#F0A04B">हमारा गांव · हमारी पहचान</text>
+      <text x="196" y="138" textAnchor="middle" fontFamily="Mukta, sans-serif" fontSize="10" letterSpacing="2" fill="#93AF9C">जिला जयपुर · राजस्थान</text>
+    </svg>
+  );
+}
+
+function SectionHeader({ kicker, title, sub, icon, light = false, center = false }) {
+  return (
+    <div className={`mb-10 md:mb-12 ${center ? 'text-center' : ''}`}>
+      <div className={`flex items-center gap-2.5 ${center ? 'justify-center' : ''}`}>
+        <span className="h-[3px] w-9 rounded-full bg-brand-saffron shrink-0" />
+        {icon && <Icon name={icon} size={15} className={light ? 'text-brand-saffronLight' : 'text-brand-saffron'} />}
+        <span className={`text-sm font-bold tracking-wider ${light ? 'text-brand-saffronLight' : 'text-brand-saffron'}`}>{kicker}</span>
+        {center && <span className="h-[3px] w-9 rounded-full bg-brand-saffron shrink-0" />}
+      </div>
+      <h2 className={`font-display text-3xl md:text-[2.6rem] mt-3 ${light ? 'text-white' : 'text-brand-green'}`}>{title}</h2>
+      {sub && <p className={`mt-3 max-w-2xl leading-relaxed ${light ? 'text-white/70' : 'text-ink/60'} ${center ? 'mx-auto' : ''}`}>{sub}</p>}
+    </div>
+  );
+}
+
+function SocialIcons({ light = false, notify }) {
+  const items = [['instagram', 'Instagram'], ['facebook', 'Facebook'], ['youtube', 'YouTube'], ['twitter', 'X / Twitter']];
+  const base = light
+    ? 'border-white/25 text-white/80 hover:bg-white/10 hover:text-white'
+    : 'border-brand-sand text-ink/60 hover:bg-brand-cream hover:text-brand-green';
+  return (
+    <div className="flex items-center gap-2">
+      {items.map(([ic, label]) => (
+        <button key={ic} aria-label={label} title={label}
+          onClick={() => notify && notify('सोशल मीडिया लिंक डेमो हेतु हैं — यह एक काल्पनिक पोर्टल है।')}
+          className={`w-8 h-8 rounded-full border flex items-center justify-center transition-colors ${base}`}>
+          <Icon name={ic} size={14} />
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function SearchField({ onSearch, full = false }) {
+  const [q, setQ] = useState('');
+  return (
+    <form role="search" onSubmit={e => { e.preventDefault(); const v = q.trim(); if (v) { onSearch(v); setQ(''); } }}
+      className={full ? 'w-full' : ''}>
+      <div className="relative">
+        <Icon name="search" size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink/40 pointer-events-none" />
+        <input value={q} onChange={e => setQ(e.target.value)} type="search" placeholder="पोर्टल में खोजें…"
+          aria-label="पोर्टल में खोजें"
+          className={`border border-brand-sand bg-brand-cream/60 rounded-full py-2 pl-10 pr-4 text-sm placeholder:text-ink/35 focus:outline-none focus:border-brand-saffron focus:ring-2 focus:ring-brand-saffron/20 transition ${full ? 'w-full' : 'w-44 2xl:w-52'}`} />
+      </div>
+    </form>
+  );
+}
+
+/* Generic modal (dialog + overlay + Escape + inner scroll) */
+function Modal({ open, onClose, children, wide = 'max-w-2xl', label = 'संवाद' }) {
+  useEffect(() => {
+    if (!open) return;
+    const h = e => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', h);
+    document.body.style.overflow = 'hidden';
+    return () => { document.removeEventListener('keydown', h); document.body.style.overflow = ''; };
+  }, [open, onClose]);
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 md:p-6" role="dialog" aria-modal="true" aria-label={label}>
+      <div className="absolute inset-0 bg-brand-deep/70 backdrop-blur-sm" onClick={onClose} />
+      <div className={`relative w-full ${wide} bg-white rounded-2xl overflow-hidden shadow-2xl max-h-[90vh] flex flex-col animate-pop`}>
+        <button onClick={onClose} aria-label="बंद करें"
+          className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-white/95 shadow-md flex items-center justify-center text-brand-deep hover:bg-brand-cream transition-colors">
+          <Icon name="x" size={17} />
+        </button>
+        <div className="overflow-y-auto">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+/* Full-screen photo lightbox with prev/next + keyboard */
+function Lightbox({ data, onClose, onNav }) {
+  useEffect(() => {
+    if (!data) return;
+    const h = e => {
+      if (e.key === 'Escape') onClose();
+      if (e.key === 'ArrowRight') onNav(1);
+      if (e.key === 'ArrowLeft') onNav(-1);
+    };
+    document.addEventListener('keydown', h);
+    document.body.style.overflow = 'hidden';
+    return () => { document.removeEventListener('keydown', h); document.body.style.overflow = ''; };
+  }, [data, onClose, onNav]);
+  if (!data) return null;
+  const item = data.list[data.index];
+  const n = data.list.length;
+  return (
+    <div className="fixed inset-0 z-[95] bg-brand-deep/95 flex items-center justify-center p-4 md:p-10 animate-pop" role="dialog" aria-modal="true" aria-label="फोटो दर्शक">
+      <button onClick={onClose} aria-label="बंद करें"
+        className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors">
+        <Icon name="x" size={18} />
+      </button>
+      <button onClick={() => onNav(-1)} aria-label="पिछली तस्वीर"
+        className="absolute left-2 md:left-8 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors z-10">
+        <Icon name="chevronLeft" size={20} />
+      </button>
+      <button onClick={() => onNav(1)} aria-label="अगली तस्वीर"
+        className="absolute right-2 md:right-8 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors z-10">
+        <Icon name="chevronRight" size={20} />
+      </button>
+      <figure className="max-w-4xl w-full text-center">
+        <SmartImage img={item.img} fit="contain" className="w-full h-[62vh] md:h-[72vh] rounded-lg bg-brand-deep" />
+        <figcaption className="mt-4 text-white/85 font-serifhi italic flex items-center justify-center gap-2 text-sm">
+          <Icon name="camera" size={14} className="text-brand-saffronLight" />
+          {item.caption}
+          <span className="text-white/40 not-italic text-xs">({data.index + 1}/{n})</span>
+        </figcaption>
+      </figure>
+    </div>
+  );
+}
+
+/* ============================================================
+   CHROME — TopStrip, Header, Toast, BackToTop, SearchOverlay
+   ============================================================ */
+function TopStrip({ notify }) {
+  return (
+    <div className="bg-brand-green text-white/85 text-xs">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-9 flex items-center justify-between gap-4">
+        <p className="flex items-center gap-1.5 min-w-0">
+          <Icon name="mapPin" size={13} className="text-brand-saffronLight shrink-0" />
+          <span className="truncate">ग्राम पंचायत सूर्यपुरा · जिला जयपुर, राजस्थान</span>
+        </p>
+        <div className="hidden sm:flex items-center gap-4 shrink-0">
+          <a href="tel:+919999888855" className="flex items-center gap-1.5 hover:text-white transition-colors">
+            <Icon name="phone" size={13} className="text-brand-saffronLight" /> +91 94132 06514
+          </a>
+          <span className="text-white/30">|</span>
+          <SocialIcons light notify={notify} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Header({ goTo, onSearch, notify, active }) {
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    const h = e => { if (e.key === 'Escape') setOpen(false); };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, [open]);
+  return (
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-brand-sand shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-4 h-16 lg:h-[72px]">
+        <button onClick={() => goTo('home')} className="flex items-center gap-3 shrink-0 min-w-0 text-left" aria-label="सूर्यपुरा — होम">
+          <Emblem size={44} className="lg:hidden" />
+          <Emblem size={50} className="hidden lg:block" />
+          <span className="leading-none min-w-0">
+            <span className="block font-display text-xl lg:text-2xl text-brand-green">सूर्यपुरा</span>
+            <span className="block text-[10px] lg:text-[11px] tracking-[0.22em] font-semibold text-ink/55 mt-1.5">ग्राम विकास पोर्टल</span>
+            <span className="hidden xl:block text-[11px] text-brand-saffron font-serifhi italic mt-1">हमारा गांव, हमारा विकास, हमारी पहचान</span>
+          </span>
+        </button>
+
+        <nav className="hidden xl:flex flex-1 items-center justify-center gap-0.5 min-w-0" aria-label="मुख्य नेविगेशन">
+          {NAV.map(n => (
+            <button key={n.id} onClick={() => goTo(n.id)} aria-current={active === n.id ? 'page' : undefined}
+              className={`px-2 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${active === n.id ? 'text-brand-green bg-brand-cream' : 'text-ink/70 hover:text-brand-green hover:bg-brand-cream/70'}`}>
+              {n.label}
+            </button>
+          ))}
+        </nav>
+
+        <div className="hidden xl:block shrink-0">
+          <SearchField onSearch={onSearch} />
+        </div>
+
+        <button className="xl:hidden ml-auto w-10 h-10 rounded-lg border border-brand-sand flex items-center justify-center text-brand-green hover:bg-brand-cream transition-colors"
+          onClick={() => setOpen(o => !o)} aria-label={open ? 'मेन्यू बंद करें' : 'मेन्यू खोलें'} aria-expanded={open} aria-controls="mobile-menu">
+          <Icon name={open ? 'x' : 'menu'} size={20} />
+        </button>
+      </div>
+
+      {open && (
+        <div id="mobile-menu" className="xl:hidden border-t border-brand-sand bg-white animate-pop">
+          <div className="px-4 sm:px-6 py-4 max-h-[calc(100vh-6rem)] overflow-y-auto no-scrollbar">
+            <SearchField full onSearch={q => { setOpen(false); onSearch(q); }} />
+            <nav className="mt-3 grid grid-cols-2 gap-1.5" aria-label="मोबाइल नेविगेशन">
+              {NAV.map(n => (
+                <button key={n.id} onClick={() => { goTo(n.id); setOpen(false); }}
+                  className={`text-left px-4 py-3 rounded-lg font-medium flex items-center justify-between transition-colors ${active === n.id ? 'bg-brand-cream text-brand-green' : 'text-ink/80 hover:bg-brand-cream'}`}>
+                  {n.label}
+                  <Icon name="chevronRight" size={14} className="text-brand-saffron" />
+                </button>
+              ))}
+            </nav>
+            <div className="mt-4 pt-4 border-t border-brand-sand flex items-center justify-between">
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-brand-green">गांव से जुड़ें</p>
+                <p className="text-[11px] text-ink/50 mt-0.5 truncate">+91 94132 06514</p>
+              </div>
+              <SocialIcons notify={notify} />
+            </div>
+          </div>
+        </div>
+      )}
+    </header>
+  );
+}
+
+function Toast({ msg }) {
+  return (
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] bg-brand-deep text-white text-sm px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 animate-pop max-w-[90vw]" role="status">
+      <Icon name="check" size={15} className="text-brand-saffronLight shrink-0" />
+      <span className="text-center leading-snug">{msg}</span>
+    </div>
+  );
+}
+
+function BackToTop({ show, onClick }) {
+  if (!show) return null;
+  return (
+    <button onClick={onClick} aria-label="ऊपर जाएं"
+      className="fixed bottom-5 right-5 z-40 w-11 h-11 rounded-full bg-brand-green text-white shadow-lg flex items-center justify-center hover:bg-brand-leaf transition-colors animate-pop">
+      <Icon name="arrowUp" size={18} />
+    </button>
+  );
+}
+
+function SearchOverlay({ open, q, setQ, close, goTo }) {
+  const r = useRef(null);
+  useEffect(() => { if (open && r.current) r.current.focus(); }, [open]);
+  useEffect(() => {
+    if (!open) return;
+    const h = e => { if (e.key === 'Escape') close(); };
+    window.addEventListener('keydown', h);
+    document.body.style.overflow = 'hidden';
+    return () => { window.removeEventListener('keydown', h); document.body.style.overflow = ''; };
+  }, [open, close]);
+  if (!open) return null;
+  const ql = q.trim().toLowerCase();
+  const results = ql
+    ? SEARCH.filter(s => s.label.toLowerCase().includes(ql) || s.kw.some(k => k.toLowerCase().includes(ql)))
+    : SEARCH;
+  const go = id => { close(); setQ(''); goTo(id); };
+  return (
+    <div className="fixed inset-0 z-[85]" role="dialog" aria-modal="true" aria-label="खोज">
+      <div className="absolute inset-0 bg-brand-deep/60 backdrop-blur-sm" onClick={close} />
+      <div className="relative bg-white shadow-2xl rounded-b-3xl animate-pop max-h-[80vh] flex flex-col">
+        <form onSubmit={e => { e.preventDefault(); if (results.length) go(results[0].id); }}
+          className="flex items-center gap-3 px-4 md:px-6 py-4 border-b border-brand-sand">
+          <Icon name="search" size={18} className="text-brand-saffron shrink-0" />
+          <input ref={r} value={q} onChange={e => setQ(e.target.value)}
+            placeholder="खोजें — जैसे “किसान”, “स्कूल”, “सड़क”…"
+            aria-label="पोर्टल में खोजें"
+            className="flex-1 min-w-0 text-base md:text-lg bg-transparent py-1 focus:outline-none placeholder:text-ink/35 text-ink" />
+          <button type="button" onClick={close} aria-label="खोज बंद करें"
+            className="w-9 h-9 rounded-full border border-brand-sand flex items-center justify-center text-ink/60 hover:bg-brand-cream transition-colors shrink-0">
+            <Icon name="x" size={16} />
+          </button>
+        </form>
+        <div className="overflow-y-auto p-3 md:p-4">
+          <p className="px-2 pb-2 text-xs font-bold tracking-wider text-ink/45">
+            {ql ? `“${q.trim()}” के लिए ${results.length} परिणाम` : 'सभी खंड ब्राउज़ करें'}
+          </p>
+          {results.length === 0 ? (
+            <p className="px-3 py-8 text-sm text-ink/55 text-center">कोई परिणाम नहीं मिला — “किसान”, “शिक्षा” या “समाचार” आज़माएं।</p>
+          ) : (
+            <ul className="grid sm:grid-cols-2 gap-1.5">
+              {results.map(s => (
+                <li key={s.id}>
+                  <button onClick={() => go(s.id)}
+                    className="w-full text-left px-3.5 py-3 rounded-xl hover:bg-brand-cream flex items-center gap-3 group transition-colors">
+                    <span className="w-8 h-8 rounded-lg bg-brand-cream border border-brand-sand text-brand-green flex items-center justify-center shrink-0 group-hover:bg-brand-green group-hover:text-white transition-colors">
+                      <Icon name="chevronRight" size={14} />
+                    </span>
+                    <span className="text-[15px] font-semibold text-ink/80">{s.label}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   HERO + STATS
+   ============================================================ */
+function Hero({ goTo }) {
+  return (
+    <section id="home" className="relative bg-brand-deep">
+      <div className="absolute inset-0">
+        <SmartImage img={IMAGES.hero} eager className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-brand-deep/45" />
+        <div className="absolute inset-0 bg-gradient-to-r from-brand-deep/95 via-brand-deep/55 to-brand-deep/10" />
+        <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-brand-deep/85 to-transparent" />
+      </div>
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24 md:pt-24 md:pb-32 lg:pt-20 lg:pb-36 flex flex-col justify-center min-h-[600px] lg:min-h-[680px]">
+        <div className="grid lg:grid-cols-[minmax(0,1fr)_320px] gap-12 lg:gap-16 items-center">
+          <div className="max-w-2xl">
+            <span className="inline-flex items-center gap-2 bg-white/10 border border-white/25 backdrop-blur-sm text-white/90 text-xs font-semibold tracking-wider px-3.5 py-1.5 rounded-full">
+              <Icon name="sun" size={14} className="text-brand-saffronLight" />
+              ग्राम विकास अभियान 2026
+            </span>
+            <h1 className="font-display text-[2.5rem] sm:text-5xl lg:text-6xl xl:text-[4.25rem] leading-[1.15] text-white mt-5">
+              विकसित गांव,<br />
+              <span className="text-brand-saffronLight">समृद्ध भारत</span>
+            </h1>
+            <p className="mt-5 text-lg md:text-xl text-white/90 font-medium">सूर्यपुरा — एक नई सोच, एक बेहतर कल</p>
+            <blockquote className="mt-4 border-l-4 border-brand-saffron pl-4 font-serifhi italic text-white/85 text-base md:text-lg leading-relaxed">
+              “जब गांव आगे बढ़ता है, तब देश मजबूत होता है।”
+            </blockquote>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <button onClick={() => goTo('village')}
+                className="inline-flex items-center gap-2 bg-brand-saffron hover:bg-brand-saffronDark text-white font-bold px-6 md:px-7 py-3 md:py-3.5 rounded-xl shadow-lg shadow-brand-deep/40 hover:-translate-y-0.5 transition-all text-base md:text-lg">
+                हमारे गांव के बारे में जानें
+                <Icon name="arrowRight" size={19} />
+              </button>
+              <button onClick={() => goTo('samachar')}
+                className="inline-flex items-center gap-2 border-2 border-white/40 hover:border-white hover:bg-white/10 text-white font-bold px-6 py-3 md:py-[0.8rem] rounded-xl transition-all text-base md:text-lg">
+                <Icon name="newspaper" size={18} className="text-brand-saffronLight" />
+                ताजा समाचार
+              </button>
+            </div>
+          </div>
+
+          {/* Ambassador — arch-framed campaign portrait (fictional) */}
+          <div className="hidden lg:flex justify-center relative pb-8">
+            <div className="relative w-[290px]">
+              <div className="bg-white p-2.5 pb-3 rounded-t-[150px] rounded-b-2xl shadow-2xl rotate-1">
+                <div className="overflow-hidden rounded-t-[140px] rounded-b-xl aspect-[3/4] bg-brand-sand">
+                  <SmartImage img={IMAGES.leader} className="w-full h-full object-cover" />
+                </div>
+              </div>
+              <span className="absolute -top-2 -right-3 rotate-3 bg-brand-saffron text-white text-xs font-bold px-3 py-1.5 rounded-md shadow-lg flex items-center gap-1.5">
+                <Icon name="award" size={13} /> ग्राम विकास दूत
+              </span>
+              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-white rounded-xl shadow-xl px-5 py-2.5 text-center border border-brand-sand w-max max-w-full">
+                <p className="font-bold text-brand-green text-sm leading-tight whitespace-nowrap">श्री रामलाल शर्मा</p>
+                <p className="text-[11px] text-ink/55 mt-0.5 whitespace-nowrap">ग्राम विकास दूत · काल्पनिक पात्र</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile composition: small ambassador + signboard */}
+        <div className="lg:hidden mt-10 flex items-end justify-between gap-5">
+          <div className="w-24 shrink-0 -rotate-2">
+            <div className="bg-white p-1.5 rounded-t-[60px] rounded-b-lg shadow-xl">
+              <div className="overflow-hidden rounded-t-[54px] rounded-md aspect-[3/4] bg-brand-sand">
+                <SmartImage img={IMAGES.leader} className="w-full h-full object-cover" />
+              </div>
+            </div>
+          </div>
+          <SignBoard className="w-full h-auto max-w-[15rem] sm:max-w-[17rem] drop-shadow-xl" />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function StatsBand() {
+  return (
+    <div className="relative z-10 -mt-12 md:-mt-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto bg-white rounded-2xl border border-brand-sand shadow-xl grid grid-cols-2 lg:grid-cols-4 lg:divide-x divide-brand-sand/70 overflow-hidden">
+        {STATS.map(s => (
+          <div key={s.label} className="flex items-center gap-3.5 p-4 sm:p-5 lg:p-6">
+            <span className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-brand-cream border border-brand-sand text-brand-saffron flex items-center justify-center shrink-0">
+              <Icon name={s.icon} size={18} />
+            </span>
+            <div className="min-w-0">
+              <p className="text-xl sm:text-2xl font-bold text-brand-green leading-tight">{s.value}</p>
+              <p className="text-[11px] sm:text-xs text-ink/55 mt-0.5 truncate">{s.label}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   QUICK ACCESS
+   ============================================================ */
+function QuickAccess({ goTo }) {
+  return (
+    <section className="bg-brand-cream pt-16 pb-14 md:pt-20 md:pb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-8 md:mb-10">
+          <p className="text-xs font-bold tracking-wider text-brand-saffron">त्वरित सेवाएं</p>
+          <h3 className="font-display text-2xl md:text-3xl text-brand-green mt-2">गांव की मुख्य सेवाएं</h3>
+          <div className="flex items-center justify-center gap-2 mt-3">
+            <span className="h-[3px] w-8 rounded-full bg-brand-saffron" />
+            <span className="h-[3px] w-3 rounded-full bg-brand-saffron/50" />
+            <span className="h-[3px] w-1.5 rounded-full bg-brand-saffron/30" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
+          {QUICK.map(q => (
+            <button key={q.title} onClick={() => goTo(q.target)}
+              className="group h-full text-left bg-white border border-brand-sand rounded-2xl p-5 hover:border-brand-saffron/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <span className="w-11 h-11 rounded-full bg-brand-green text-white flex items-center justify-center group-hover:bg-brand-saffron transition-colors">
+                <Icon name={q.icon} size={20} />
+              </span>
+              <h4 className="mt-4 font-bold text-lg text-brand-green leading-snug">{q.title}</h4>
+              <p className="mt-1 text-sm text-ink/60 leading-relaxed">{q.desc}</p>
+              <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-brand-saffron group-hover:gap-2 transition-all">
+                देखें <Icon name="chevronRight" size={12} />
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   NEWS
+   ============================================================ */
+function News({ onOpen }) {
+  return (
+    <section id="samachar" className="bg-white py-16 md:py-24 scroll-mt-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <SectionHeader kicker="गांव की आवाज़" icon="newspaper" title="ताजा समाचार"
+          sub="सूर्यपुरा की ताज़ा गतिविधियां — किसी भी समाचार पर क्लिक करके पूरी जानकारी पढ़ें।" />
+        <div className="grid lg:grid-cols-[1.35fr_1fr] gap-6 items-start">
+          <article onClick={() => onOpen(0)} role="button" tabIndex={0}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen(0); } }}
+            aria-label={`${NEWS[0].title} — पूरा समाचार पढ़ें`}
+            className="group cursor-pointer bg-brand-cream border border-brand-sand rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+            <div className="relative aspect-[16/9] bg-brand-sand overflow-hidden">
+              <SmartImage img={NEWS[0].img} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              <span className="absolute top-3 right-3 bg-brand-saffron text-white text-[11px] font-bold px-2.5 py-1 rounded-md">{NEWS[0].tag}</span>
+              <span className="absolute bottom-3 left-3 bg-white/95 text-brand-green text-[11px] font-bold px-3 py-1 rounded-md flex items-center gap-1.5">
+                <Icon name="calendar" size={11} className="text-brand-saffron" /> {NEWS[0].date}
+              </span>
+            </div>
+            <div className="p-6">
+              <h3 className="font-display text-2xl md:text-[1.7rem] text-brand-green group-hover:text-brand-saffron transition-colors leading-snug">{NEWS[0].title}</h3>
+              <p className="mt-2 text-ink/60 text-[15px] leading-relaxed clamp-2">{NEWS[0].excerpt}</p>
+              <span className="mt-4 inline-flex items-center gap-1.5 text-brand-saffron font-semibold text-sm group-hover:gap-2.5 transition-all">
+                पूरा पढ़ें <Icon name="arrowRight" size={15} />
+              </span>
+            </div>
+          </article>
+
+          <div className="flex flex-col gap-6">
+            {NEWS.slice(1).map((n, i) => (
+              <article key={n.title} onClick={() => onOpen(i + 1)} role="button" tabIndex={0}
+                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen(i + 1); } }}
+                aria-label={`${n.title} — पूरा समाचार पढ़ें`}
+                className="group cursor-pointer flex bg-brand-cream border border-brand-sand rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 text-left">
+                <div className="relative w-28 sm:w-40 shrink-0 bg-brand-sand overflow-hidden">
+                  <SmartImage img={n.img} className="absolute inset-0 w-full h-full object-cover" />
+                </div>
+                <div className="p-4 sm:p-5 min-w-0">
+                  <p className="text-xs text-ink/50 flex items-center gap-1.5">
+                    <Icon name="calendar" size={12} className="text-brand-saffron shrink-0" />{n.date}
+                  </p>
+                  <h3 className="mt-1.5 font-bold text-[15px] sm:text-lg text-brand-green leading-snug group-hover:text-brand-saffron transition-colors clamp-2">{n.title}</h3>
+                  <p className="mt-1.5 text-sm text-ink/60 leading-relaxed clamp-2">{n.excerpt}</p>
+                  <span className="mt-2.5 inline-flex items-center gap-1 text-brand-saffron font-semibold text-sm group-hover:gap-2 transition-all">
+                    पूरा पढ़ें <Icon name="chevronRight" size={13} />
+                  </span>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function NewsModal({ idx, onClose, notify }) {
+  const n = idx !== null ? NEWS[idx] : null;
+  return (
+    <Modal open={idx !== null} onClose={onClose} wide="max-w-2xl" label="समाचार">
+      {n && (
+        <article>
+          <div className="relative aspect-[16/8] bg-brand-sand">
+            <SmartImage img={n.img} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-brand-deep/50 to-transparent" />
+            <span className="absolute top-3 right-3 bg-brand-saffron text-white text-[11px] font-bold px-2.5 py-1 rounded-md">{n.tag}</span>
+            <span className="absolute bottom-3 left-4 bg-white/95 text-brand-green text-[11px] font-bold px-3 py-1 rounded-md flex items-center gap-1.5">
+              <Icon name="calendar" size={11} className="text-brand-saffron" /> {n.date}
+            </span>
+          </div>
+          <div className="p-6 md:p-8">
+            <h3 className="font-display text-2xl md:text-3xl text-brand-green leading-snug">{n.title}</h3>
+            <div className="mt-4 space-y-3">
+              {n.body.map((t, i) => <p key={i} className="text-[15px] leading-relaxed text-ink/75">{t}</p>)}
+            </div>
+            <div className="mt-6 pt-5 border-t border-brand-sand flex flex-wrap items-center gap-3">
+              <span className="text-xs text-ink/50 mr-auto">ग्राम पंचायत सूर्यपुरा · सूर्यपुरा समाचार</span>
+              {[['heart', 'पसंद'], ['message', 'टिप्पणी'], ['share2', 'शेयर']].map(([ic, lb]) => (
+                <button key={ic} onClick={() => notify(`${lb} — डेमो अभियान से बाहरी शेयरिंग उपलब्ध नहीं है।`)}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink/60 hover:text-brand-saffron border border-brand-sand rounded-full px-3 py-1.5 hover:border-brand-saffron/50 transition-colors">
+                  <Icon name={ic} size={13} /> {lb}
+                </button>
+              ))}
+            </div>
+          </div>
+        </article>
+      )}
+    </Modal>
+  );
+}
+
+/* ============================================================
+   OUR VILLAGE + PANCHAYAT
+   ============================================================ */
+function Village({ onPlay, onAgenda }) {
+  return (
+    <section id="village" className="bg-brand-cream py-16 md:py-24 scroll-mt-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <SectionHeader kicker="एक नज़र में" icon="mapPin" title="हमारा गांव"
+          sub="अरावली की तलहटी में बसा सूर्यपुरा — परंपरा, प्रगति और संभावनाओं का संगम।" />
+        <div className="grid lg:grid-cols-[1.5fr_1fr] gap-10 lg:gap-14 items-start">
+          <figure>
+            <div className="relative rounded-2xl overflow-hidden border border-brand-sand shadow-lg bg-brand-sand">
+              <div className="relative aspect-[16/10]">
+                <SmartImage img={IMAGES.village} className="w-full h-full object-cover" />
+                <button onClick={onPlay} aria-label="गांव की झलक देखें"
+                  className="absolute inset-0 w-full h-full flex items-center justify-center group">
+                  <span className="w-16 h-16 md:w-[4.5rem] md:h-[4.5rem] rounded-full bg-white/95 text-brand-green flex items-center justify-center shadow-xl ring-8 ring-white/25 group-hover:scale-105 transition-transform">
+                    <Icon name="play" size={26} filled className="ml-1" />
+                  </span>
+                </button>
+                <span className="absolute bottom-3 left-3 bg-brand-deep/60 backdrop-blur text-white text-[11px] font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                  <Icon name="camera" size={12} className="text-brand-saffronLight" /> गांव की झलक
+                </span>
+              </div>
+            </div>
+            <figcaption className="mt-3 text-brand-green font-serifhi italic text-base md:text-lg flex items-center gap-2">
+              <Icon name="sun" size={16} className="text-brand-saffron shrink-0" />
+              सूर्यपुरा — परंपरा और प्रगति का संगम
+            </figcaption>
+          </figure>
+
+          <div>
+            <p className="text-[15px] md:text-base leading-relaxed text-ink/75">
+              तीन पीढ़ियों की मेहनत, साझा परंपराओं और नए विचारों का गांव। यहां खेती जीवन का आधार है,
+              और शिक्षा, स्वच्छता व डिजिटल सेवाओं की दिशा में सूर्यपुरा तेजी से आगे बढ़ रहा है।
+            </p>
+            <ul className="mt-5">
+              {VILLAGE_FACTS.map(f => (
+                <li key={f.label} className="flex items-center gap-3 py-3 border-b border-dashed border-brand-sand">
+                  <span className="w-9 h-9 rounded-full bg-white border border-brand-sand text-brand-green flex items-center justify-center shrink-0">
+                    <Icon name={f.icon} size={16} />
+                  </span>
+                  <span className="text-sm text-ink/55">{f.label}</span>
+                  <span className="ml-auto text-sm font-bold text-brand-green text-right">{f.value}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-7 flex justify-center">
+              <SignBoard className="w-52 sm:w-60 h-auto drop-shadow-xl" />
+            </div>
+          </div>
+        </div>
+
+        {/* ग्राम पंचायत block */}
+        <div id="panchayat" className="mt-14 scroll-mt-28 bg-white border border-brand-sand rounded-2xl overflow-hidden shadow-sm md:grid md:grid-cols-2">
+          <div className="relative min-h-[240px] bg-brand-sand">
+            <SmartImage img={IMAGES.panchayat} className="absolute inset-0 w-full h-full object-cover" />
+            <span className="absolute top-3 left-3 bg-white/95 text-brand-green text-[11px] font-bold px-3 py-1.5 rounded-md flex items-center gap-1.5 shadow">
+              <Icon name="users" size={12} className="text-brand-saffron" /> ग्राम सभा, सूर्यपुरा
+            </span>
+          </div>
+          <div className="p-6 md:p-8">
+            <p className="text-xs font-bold tracking-wider text-brand-saffron">जन सेवा · जन सहभागिता</p>
+            <h3 className="font-display text-2xl md:text-[1.75rem] text-brand-green mt-2">ग्राम पंचायत सूर्यपुरा</h3>
+            <div className="mt-4 flex items-center gap-3">
+              <span className="w-11 h-11 rounded-full bg-brand-green text-brand-saffronLight font-bold flex items-center justify-center text-lg shrink-0">सी</span>
+              <div className="min-w-0">
+                <p className="font-bold text-brand-green text-[15px]">श्रीमती सीता देवी</p>
+                <p className="text-xs text-ink/55 mt-0.5">सरपंच · 12 पंच, 4 वार्ड (काल्पनिक)</p>
+              </div>
+            </div>
+            <p className="mt-4 text-sm leading-relaxed text-ink/65">
+              हर माह की ग्राम सभा में विकास कार्यों की समीक्षा, योजनाओं की जानकारी और शिकायतों का
+              निस्तारण साझा निर्णय से होता है।
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="text-xs font-semibold bg-brand-cream border border-brand-sand rounded-lg px-3 py-2 text-ink/70 flex items-center gap-1.5">
+                <Icon name="calendar" size={12} className="text-brand-saffron" /> अगली बैठक: 15 नवंबर 2026
+              </span>
+              <span className="text-xs font-semibold bg-brand-cream border border-brand-sand rounded-lg px-3 py-2 text-ink/70 flex items-center gap-1.5">
+                <Icon name="clock" size={12} className="text-brand-saffron" /> प्रातः 11:00 · पंचायत भवन
+              </span>
+            </div>
+            <button onClick={onAgenda}
+              className="mt-6 inline-flex items-center gap-2 bg-brand-green hover:bg-brand-leaf text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors">
+              पूरी कार्यसूची देखें <Icon name="chevronRight" size={15} />
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   PROJECTS (विकास कार्य)
+   ============================================================ */
+function Projects({ onOpen }) {
+  return (
+    <section id="projects" className="bg-white py-16 md:py-24 scroll-mt-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <SectionHeader kicker="प्रगति की रिपोर्ट" icon="briefcase" title="विकास कार्य"
+          sub="पंचायत की प्रमुख परियोजनाएं — स्थिति, लागत और लाभान्वित परिवारों की जानकारी के साथ।" />
+        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {PROJECTS.map((p, i) => (
+            <article key={p.num} className="group bg-white border border-brand-sand rounded-2xl overflow-hidden flex flex-col hover:shadow-xl hover:-translate-y-1 hover:border-brand-saffron/40 transition-all duration-300">
+              <div className="relative aspect-[16/10] bg-brand-sand overflow-hidden">
+                <SmartImage img={p.img} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <div className="absolute inset-0 bg-gradient-to-t from-brand-deep/45 to-transparent" />
+                <span className={`absolute top-3 left-3 text-[11px] font-bold px-2.5 py-1 rounded-md border ${STATUS_STYLE[p.statusType]}`}>{p.status}</span>
+                <span className="absolute bottom-3 left-3 bg-brand-deep/50 backdrop-blur text-white/90 font-display text-2xl px-2.5 py-0.5 rounded-md">{p.num}</span>
+              </div>
+              <div className="p-5 flex flex-col flex-1">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-8 h-8 rounded-lg bg-brand-cream border border-brand-sand text-brand-saffron flex items-center justify-center shrink-0">
+                    <Icon name={p.icon} size={15} />
+                  </span>
+                  <h3 className="font-bold text-lg text-brand-green leading-snug">{p.title}</h3>
+                </div>
+                <p className="mt-3 text-sm text-ink/60 leading-relaxed clamp-2">{p.desc}</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-brand-cream border border-brand-sand rounded-lg px-2.5 py-1.5 text-ink/70">
+                    <Icon name="briefcase" size={12} className="text-brand-saffron" />{p.meta['लागत']}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-brand-cream border border-brand-sand rounded-lg px-2.5 py-1.5 text-ink/70">
+                    <Icon name="users" size={12} className="text-brand-saffron" />{p.meta['लाभान्वित']}
+                  </span>
+                </div>
+                <div className="mt-4">
+                  <div className="flex justify-between text-[11px] font-semibold text-ink/50 mb-1.5">
+                    <span>प्रगति</span><span>{p.progress}%</span>
+                  </div>
+                  <div className="h-1.5 bg-brand-sand rounded-full overflow-hidden">
+                    <div className={`h-full rounded-full ${p.statusType === 'done' ? 'bg-brand-green' : p.statusType === 'going' ? 'bg-brand-saffron' : 'bg-ink/25'}`}
+                      style={{ width: p.progress + '%' }} />
+                  </div>
+                </div>
+                <button onClick={() => onOpen(i)}
+                  className="mt-5 pt-4 border-t border-brand-sand/70 w-full flex items-center justify-between text-sm font-bold text-brand-saffron hover:text-brand-saffronDark transition-colors">
+                  विवरण देखें <Icon name="arrowRight" size={16} />
+                </button>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ProjectModal({ idx, onClose, goTo }) {
+  const p = idx !== null ? PROJECTS[idx] : null;
+  return (
+    <Modal open={idx !== null} onClose={onClose} wide="max-w-3xl" label="परियोजना विवरण">
+      {p && (
+        <article>
+          <div className="relative h-52 md:h-64 bg-brand-sand">
+            <SmartImage img={p.img} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-brand-deep/70 to-transparent" />
+            <span className={`absolute top-3 left-4 text-[11px] font-bold px-2.5 py-1 rounded-md border ${STATUS_STYLE[p.statusType]}`}>{p.status}</span>
+            <p className="absolute bottom-3 left-5 font-display text-3xl text-white/90">{p.num}</p>
+          </div>
+          <div className="p-6 md:p-8">
+            <div className="flex items-center gap-3">
+              <span className="w-10 h-10 rounded-xl bg-brand-cream border border-brand-sand text-brand-saffron flex items-center justify-center shrink-0">
+                <Icon name={p.icon} size={18} />
+              </span>
+              <h3 className="font-display text-2xl md:text-3xl text-brand-green leading-snug">{p.title}</h3>
+            </div>
+            <p className="mt-4 text-[15px] font-medium text-brand-saffron">{p.desc}</p>
+            <p className="mt-3 text-[15px] leading-relaxed text-ink/75">{p.body}</p>
+            <div className="mt-6 grid sm:grid-cols-2 gap-3">
+              {Object.entries(p.meta).map(([k, v]) => (
+                <div key={k} className="bg-brand-cream border border-brand-sand rounded-xl p-3.5">
+                  <p className="text-xs text-ink/50">{k}</p>
+                  <p className="text-sm font-bold text-brand-green mt-0.5">{v}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-6">
+              <div className="flex justify-between text-xs font-semibold text-ink/50 mb-1.5">
+                <span>परियोजना प्रगति</span><span>{p.progress}%</span>
+              </div>
+              <div className="h-2 bg-brand-sand rounded-full overflow-hidden">
+                <div className={`h-full rounded-full ${p.statusType === 'done' ? 'bg-brand-green' : p.statusType === 'going' ? 'bg-brand-saffron' : 'bg-ink/25'}`}
+                  style={{ width: p.progress + '%' }} />
+              </div>
+            </div>
+            <div className="mt-7 flex flex-wrap items-center gap-3">
+              <button onClick={() => { onClose(); goTo('contact'); }}
+                className="inline-flex items-center gap-2 bg-brand-green hover:bg-brand-leaf text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors">
+                विभाग से संपर्क करें <Icon name="arrowRight" size={15} />
+              </button>
+              <p className="text-xs text-ink/45">डेमो सामग्री — संख्याएं काल्पनिक हैं।</p>
+            </div>
+          </div>
+        </article>
+      )}
+    </Modal>
+  );
+}
+
+/* ============================================================
+   SHIKSHA (dark green section)
+   ============================================================ */
+function Shiksha({ onNews, goTo }) {
+  const features = [
+    { icon:'graduation', t:'स्मार्ट क्लास', d:'दो कक्षाओं में इंटरैक्टिव डिजिटल बोर्ड व ऑनलाइन पाठ्यक्रम' },
+    { icon:'book', t:'डिजिटल लाइब्रेरी', d:'40 टैबलेट — छठी से आठवीं के बच्चों के लिए' },
+    { icon:'award', t:'मेधावी छात्रवृत्ति', d:'प्रतिभाशाली बच्चों को ₹500 प्रति माह' },
+    { icon:'sun', t:'नई विज्ञान लैब', d:'जिला-स्तरीय विज्ञान सम्मान के बाद घोषित — अगले सत्र से' }
+  ];
+  const chips = [
+    { v:'380', l:'पढ़ने वाले बच्चे' },
+    { v:'26', l:'जिला सम्मान' },
+    { v:'2', l:'स्मार्ट क्लास' },
+    { v:'40', l:'टैबलेट' }
+  ];
+  return (
+    <section id="shiksha" className="bg-brand-deep py-16 md:py-24 scroll-mt-24 relative overflow-hidden">
+      <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-brand-saffron/10 blur-3xl pointer-events-none" aria-hidden="true" />
+      <div className="absolute -bottom-32 -left-24 w-80 h-80 rounded-full bg-brand-leaf/20 blur-3xl pointer-events-none" aria-hidden="true" />
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <div className="relative mb-8 lg:mb-0">
+            <div className="rounded-2xl overflow-hidden border border-white/15 shadow-2xl bg-brand-deep aspect-[4/3]">
+              <SmartImage img={IMAGES.school} className="w-full h-full object-cover" />
+            </div>
+            <span className="absolute top-4 left-4 bg-brand-deep/70 backdrop-blur text-white text-[11px] font-semibold px-3 py-1.5 rounded-full">
+              सरकारी उच्च प्राथमिक विद्यालय
+            </span>
+            <div className="absolute -bottom-6 -right-2 sm:-right-6 bg-white rounded-xl shadow-xl p-4 border border-brand-sand w-44">
+              <p className="font-display text-2xl text-brand-saffron">380</p>
+              <p className="text-xs text-ink/60 mt-0.5 leading-snug">बच्चे विद्यालय में पढ़ रहे हैं</p>
+            </div>
+          </div>
+
+          <div>
+            <SectionHeader light kicker="बेहतर कल की नींव" icon="graduation" title="शिक्षा एवं डिजिटल लर्निंग"
+              sub="हर बच्चे की शिक्षा — सूर्यपुरा की सबसे बड़ी प्राथमिकता।" />
+            <ul className="space-y-4">
+              {features.map(f => (
+                <li key={f.t} className="flex gap-4 items-start">
+                  <span className="w-10 h-10 rounded-xl bg-white/8 border border-white/15 text-brand-saffronLight flex items-center justify-center shrink-0">
+                    <Icon name={f.icon} size={17} />
+                  </span>
+                  <div>
+                    <p className="font-bold text-white">{f.t}</p>
+                    <p className="text-sm text-white/60 mt-0.5 leading-relaxed">{f.d}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-7 grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {chips.map(c => (
+                <div key={c.l} className="bg-white/5 border border-white/10 rounded-xl p-3.5 text-center">
+                  <p className="font-bold text-xl text-brand-saffronLight">{c.v}</p>
+                  <p className="text-[11px] text-white/55 mt-0.5">{c.l}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <button onClick={onNews}
+                className="inline-flex items-center gap-2 bg-brand-saffron hover:bg-brand-saffronDark text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-black/25 transition-colors">
+                विद्यालय की उपलब्धियां पढ़ें <Icon name="arrowRight" size={16} />
+              </button>
+              <button onClick={() => goTo('samachar')}
+                className="inline-flex items-center gap-2 border-2 border-white/30 hover:border-white/60 hover:bg-white/5 text-white font-bold px-6 py-3 rounded-xl transition-colors">
+                सभी समाचार
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   KISAN
+   ============================================================ */
+function Kisan({ notify }) {
+  const stats = [
+    { icon:'users', v:'850+', l:'किसान परिवार' },
+    { icon:'droplet', v:'120 एकड़', l:'ड्रिप सिंचाई क्षेत्र' },
+    { icon:'sun', v:'40%', l:'पानी की बचत' },
+    { icon:'award', v:'610', l:'शिविर में लाभान्वित' }
+  ];
+  return (
+    <section id="kisan" className="bg-brand-cream py-16 md:py-24 scroll-mt-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <SectionHeader kicker="खेत से आत्मनिर्भर गांव" icon="sprout" title="कृषि एवं किसान"
+          sub="आधुनिक तकनीक, बेहतर बीज और जल-बचत — सूर्यपुरा के किसानों की दिशा।" />
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <div className="order-2 lg:order-1">
+            <p className="text-[15px] md:text-base leading-relaxed text-ink/75">
+              खेती सूर्यपुरा की धड़कन है। अन्नदाताओं की आय बढ़ाने के लिए पंचायत उन्नत बीज,
+              ड्रिप सिंचाई और मंडी तक सीधी पहुंच पर काम कर रही है।
+            </p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              {['बाजरा', 'गेहूं', 'सरसों'].map(c => (
+                <span key={c} className="inline-flex items-center gap-1.5 bg-white border border-brand-sand rounded-full px-3.5 py-1.5 text-sm font-semibold text-brand-green">
+                  <Icon name="sprout" size={13} className="text-brand-saffron" /> {c}
+                </span>
+              ))}
+            </div>
+            <div className="mt-6 bg-white border border-brand-sand border-l-4 border-l-brand-saffron rounded-xl p-5 flex gap-4 items-start">
+              <span className="w-11 h-11 rounded-full bg-brand-saffron/10 text-brand-saffron flex items-center justify-center shrink-0">
+                <Icon name="droplet" size={19} />
+              </span>
+              <div>
+                <p className="font-bold text-brand-green">ड्रिप सिंचाई अभियान</p>
+                <p className="text-sm text-ink/60 mt-1 leading-relaxed">
+                  120 एकड़ में ड्रिप सिंचाई व पांच नई बोरिंग से <b className="text-brand-saffron">40% तक पानी की बचत</b> — पांचों वार्डों में।
+                </p>
+              </div>
+            </div>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <button onClick={() => notify('किसान सहायता शिविर — अगली तिथि शीघ्र घोषित होगी (डेमो)।')}
+                className="inline-flex items-center gap-2 bg-brand-saffron hover:bg-brand-saffronDark text-white font-bold px-6 py-3 rounded-xl transition-colors">
+                शिविर की जानकारी <Icon name="chevronRight" size={15} />
+              </button>
+              <button onClick={() => notify('कृषि हेल्पलाइन वास्तविक पोर्टल पर जुड़ी जाएगी — यह डेमो है।')}
+                className="inline-flex items-center gap-2 border-2 border-brand-green/25 hover:border-brand-green text-brand-green font-bold px-6 py-3 rounded-xl transition-colors">
+                <Icon name="phone" size={15} /> कृषि हेल्पलाइन
+              </button>
+            </div>
+          </div>
+
+          <figure className="order-1 lg:order-2 relative mb-10 lg:mb-0">
+            <div className="rounded-2xl overflow-hidden border border-brand-sand shadow-lg bg-brand-sand aspect-[4/3]">
+              <SmartImage img={IMAGES.farmer} className="w-full h-full object-cover" />
+            </div>
+            <div className="hidden sm:block absolute -bottom-8 -left-4 sm:-left-6 w-40 sm:w-48 rounded-xl overflow-hidden border-4 border-brand-cream shadow-xl bg-brand-sand aspect-square">
+              <SmartImage img={IMAGES.agriculture} className="w-full h-full object-cover" />
+            </div>
+            <span className="absolute top-4 right-4 bg-white/95 backdrop-blur rounded-full px-3.5 py-1.5 text-xs font-bold text-brand-green shadow flex items-center gap-1.5">
+              <Icon name="sprout" size={13} className="text-brand-saffron" /> 850+ किसान परिवार
+            </span>
+          </figure>
+        </div>
+
+        <div className="mt-14 grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {stats.map(s => (
+            <div key={s.l} className="bg-white border border-brand-sand rounded-2xl p-4 md:p-5 flex items-center gap-3.5">
+              <span className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-brand-cream border border-brand-sand text-brand-saffron flex items-center justify-center shrink-0">
+                <Icon name={s.icon} size={17} />
+              </span>
+              <div className="min-w-0">
+                <p className="text-lg sm:text-xl font-bold text-brand-green leading-tight">{s.v}</p>
+                <p className="text-[11px] sm:text-xs text-ink/55 mt-0.5">{s.l}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   SOCIAL FEED — campaign post cards
+   ============================================================ */
+function SocialFeed({ notify }) {
+  const [liked, setLiked] = useState({});
+  const [saved, setSaved] = useState({});
+  return (
+    <section id="social" className="bg-white py-16 md:py-24 scroll-mt-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-8 md:mb-10">
+          <p className="text-xs font-bold tracking-wider text-brand-saffron">सोशल मीडिया पर सूर्यपुरा</p>
+          <h2 className="font-display text-3xl md:text-[2.6rem] text-brand-green mt-3">गांव के अभियान</h2>
+          <p className="mt-3 text-ink/60 leading-relaxed max-w-2xl mx-auto">गांव की गतिविधियां सीधे आपके फोन पर — पोस्ट पसंद आएं तो दिल दबाइए।</p>
+          <div className="mt-6 inline-flex items-center gap-3 bg-brand-cream border border-brand-sand rounded-full pl-2 pr-2 sm:pr-3 py-1.5">
+            <span className="w-9 h-9 rounded-full bg-brand-green flex items-center justify-center shrink-0">
+              <Emblem size={22} />
+            </span>
+            <span className="text-sm font-bold text-brand-green hidden sm:inline">@gram.suryapura</span>
+            <button onClick={() => notify('फॉलो — डेमो बटन, वास्तविक खाते डेमो में जुड़े नहीं हैं।')}
+              className="bg-brand-saffron hover:bg-brand-saffronDark text-white text-xs font-bold px-4 py-2 rounded-full transition-colors">
+              फॉलो करें
+            </button>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {SOCIAL_POSTS.map((p, i) => {
+            const isLiked = !!liked[i];
+            const isSaved = !!saved[i];
+            const likes = p.likes + (isLiked ? 1 : 0);
+            return (
+              <article key={i} className="bg-white border border-brand-sand rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
+                <header className="flex items-center gap-3 px-4 py-3">
+                  <span className="w-9 h-9 rounded-full bg-brand-green flex items-center justify-center shrink-0">
+                    <Emblem size={22} />
+                  </span>
+                  <div className="min-w-0 leading-tight">
+                    <p className="text-sm font-bold text-brand-green flex items-center gap-1.5">
+                      सूर्यपुरा गांव
+                      <span className="w-4 h-4 rounded-full bg-brand-saffron text-white flex items-center justify-center shrink-0" aria-label="सत्यापित खाता">
+                        <Icon name="check" size={9} strokeWidth={3} />
+                      </span>
+                    </p>
+                    <p className="text-[11px] text-ink/50 truncate">@gram.suryapura · {p.time}</p>
+                  </div>
+                  <button className="ml-auto w-8 h-8 rounded-full flex items-center justify-center text-ink/40 hover:bg-brand-cream transition-colors shrink-0"
+                    onClick={() => notify('पोस्ट विकल्प — डेमो।')} aria-label="अधिक विकल्प">
+                    <Icon name="more" size={16} />
+                  </button>
+                </header>
+
+                <div className="relative aspect-square bg-brand-sand overflow-hidden">
+                  <SmartImage img={p.img} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-brand-deep/90 via-brand-deep/25 to-transparent" />
+                  <div className="absolute bottom-0 inset-x-0 p-5 text-center">
+                    <p className="text-[10px] font-bold tracking-widest text-brand-saffronLight">अ भि या न</p>
+                    <p className="font-display text-2xl text-white leading-snug mt-1">{p.h1}</p>
+                    <p className="font-display text-lg text-brand-saffronLight leading-snug">{p.h2}</p>
+                  </div>
+                </div>
+
+                <div className="px-4 pt-3 flex items-center gap-4">
+                  <button onClick={() => setLiked(l => ({ ...l, [i]: !l[i] }))} aria-label={isLiked ? 'पसंद हटाएं' : 'पसंद करें'}
+                    aria-pressed={isLiked}
+                    className={`flex items-center gap-1.5 text-sm font-semibold transition-colors ${isLiked ? 'text-brand-saffron' : 'text-ink/55 hover:text-brand-saffron'}`}>
+                    <Icon name="heart" size={18} filled={isLiked} /> {likes.toLocaleString('en-IN')}
+                  </button>
+                  <button onClick={() => notify('टिप्पणियां डेमो में बंद हैं।')} aria-label="टिप्पणी करें"
+                    className="text-ink/55 hover:text-brand-green transition-colors">
+                    <Icon name="message" size={18} />
+                  </button>
+                  <button onClick={() => notify('पोस्ट शेयर — डेमो।')} aria-label="शेयर करें"
+                    className="text-ink/55 hover:text-brand-green transition-colors">
+                    <Icon name="share2" size={17} />
+                  </button>
+                  <button onClick={() => setSaved(s => ({ ...s, [i]: !s[i] }))} aria-label={isSaved ? 'सहेजा हटाएं' : 'सहेजें'} aria-pressed={isSaved}
+                    className={`ml-auto transition-colors ${isSaved ? 'text-brand-green' : 'text-ink/55 hover:text-brand-green'}`}>
+                    <Icon name="bookmark" size={17} filled={isSaved} />
+                  </button>
+                </div>
+                <div className="px-4 pb-4 pt-2">
+                  <p className="text-sm text-ink/70 leading-relaxed">{p.sub}</p>
+                  <p className="mt-1.5 text-xs font-semibold text-brand-saffron">{p.tags}</p>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   GALLERY + LIGHTBOX
+   ============================================================ */
+function Gallery({ onOpen }) {
+  return (
+    <section id="gallery" className="bg-brand-cream py-16 md:py-24 scroll-mt-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <SectionHeader kicker="तस्वीरों में सूर्यपुरा" icon="camera" title="फोटो गैलरी"
+          sub="गांव के दृश्य, लोग और विकास कार्य — किसी भी तस्वीर पर क्लिक करके बड़े आकार में देखें।" />
+        <div className="grid grid-cols-2 md:grid-cols-4 auto-rows-[8.5rem] sm:auto-rows-[11rem] lg:auto-rows-[12.5rem] gap-3">
+          {GALLERY.map((g, i) => (
+            <button key={i} onClick={() => onOpen(i)}
+              className={`group relative overflow-hidden rounded-xl bg-brand-sand focus-visible:outline-none ${g.span}`}
+              aria-label={`${g.caption} — बड़ा करें`}>
+              <SmartImage img={g.img} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+              <span className="absolute inset-0 bg-gradient-to-t from-brand-deep/75 via-transparent to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
+              <span className="absolute bottom-0 left-0 right-0 p-3 flex items-center gap-2 text-left">
+                <Icon name="camera" size={13} className="text-brand-saffronLight shrink-0" />
+                <span className="text-xs sm:text-sm text-white font-medium leading-snug clamp-1">{g.caption}</span>
+              </span>
+              <span className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/15 backdrop-blur text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <Icon name="maximize" size={13} />
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   CONTACT
+   ============================================================ */
+function Contact({ notify }) {
+  const [form, setForm] = useState({ name: '', phone: '', subject: 'शिकायत / सुझाव', msg: '' });
+  const [err, setErr] = useState({});
+  const set = (k, v) => { setForm(f => ({ ...f, [k]: v })); setErr(e => ({ ...e, [k]: undefined })); };
+  const IN = 'w-full bg-brand-cream/60 border border-brand-sand rounded-xl px-4 py-2.5 text-[15px] text-ink placeholder:text-ink/35 focus:outline-none focus:border-brand-saffron focus:ring-2 focus:ring-brand-saffron/20 transition';
+  const submit = e => {
+    e.preventDefault();
+    const errs = {};
+    if (!form.name.trim()) errs.name = 'कृपया अपना नाम लिखें।';
+    if (form.phone.replace(/\D/g, '').length < 10) errs.phone = 'कृपया 10 अंकों का मोबाइल नंबर लिखें।';
+    if (form.msg.trim().length < 10) errs.msg = 'कृपया संदेश में कम से कम 10 अक्षर लिखें।';
+    setErr(errs);
+    if (Object.keys(errs).length === 0) {
+      notify('धन्यवाद! आपका संदेश दर्ज हो गया — पंचायत कार्यालय शीघ्र संपर्क करेगा (डेमो)।');
+      setForm({ name: '', phone: '', subject: 'शिकायत / सुझाव', msg: '' });
+    }
+  };
+  return (
+    <section id="contact" className="bg-white py-16 md:py-24 scroll-mt-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <SectionHeader kicker="आपकी बात, पंचायत की प्राथमिकता" icon="phone" title="संपर्क करें"
+          sub="सुझाव, शिकायत या योजना संबंधी जानकारी के लिए सीधे पंचायत भवन पहुंचें या फॉर्म भरें।" />
+        <div className="grid lg:grid-cols-5 gap-8 lg:gap-10 items-start">
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-brand-green rounded-2xl p-6 md:p-7 text-white">
+              <h3 className="font-display text-xl text-white">पंचायत कार्यालय, सूर्यपुरा</h3>
+              <ul className="mt-5 space-y-4 text-sm">
+                <li className="flex gap-3 items-start">
+                  <span className="w-9 h-9 rounded-full bg-white/10 text-brand-saffronLight flex items-center justify-center shrink-0"><Icon name="mapPin" size={16} /></span>
+                  <span className="text-white/85 leading-relaxed">मुख्य सड़क, ग्राम पंचायत भवन,<br />सूर्यपुरा, पोस्ट — सांगानेर,<br />जिला जयपुर (राज.) 303029</span>
+                </li>
+                <li className="flex gap-3 items-center">
+                  <span className="w-9 h-9 rounded-full bg-white/10 text-brand-saffronLight flex items-center justify-center shrink-0"><Icon name="phone" size={16} /></span>
+                  <a href="tel:+919999888855" className="text-white/85 hover:text-white transition-colors">+91 94132 06514 (कार्यालय)</a>
+                </li>
+                <li className="flex gap-3 items-center">
+                  <span className="w-9 h-9 rounded-full bg-white/10 text-brand-saffronLight flex items-center justify-center shrink-0"><Icon name="mail" size={16} /></span>
+                  <span className="text-white/85 break-all">gp.suryapura@example.in</span>
+                </li>
+                <li className="flex gap-3 items-center">
+                  <span className="w-9 h-9 rounded-full bg-white/10 text-brand-saffronLight flex items-center justify-center shrink-0"><Icon name="clock" size={16} /></span>
+                  <span className="text-white/85">सोम – शनि · प्रातः 10:00 – 17:00</span>
+                </li>
+              </ul>
+            </div>
+            <div className="border border-brand-sand rounded-2xl overflow-hidden bg-brand-cream">
+              <svg viewBox="0 0 320 190" className="w-full block" role="img" aria-label="सूर्यपुरा का अनुमानित नक्शा">
+                <rect width="320" height="190" fill="#F3EFE3" />
+                <rect x="10" y="10" width="90" height="60" rx="6" fill="#DDE8D5" />
+                <rect x="210" y="120" width="100" height="60" rx="6" fill="#CFE0C6" />
+                <rect x="230" y="15" width="80" height="55" rx="6" fill="#DDE8D5" />
+                <path d="M0 120 C60 100 90 60 160 70 S260 40 320 70" stroke="#E7DFCC" strokeWidth="14" fill="none" />
+                <path d="M0 120 C60 100 90 60 160 70 S260 40 320 70" stroke="#FFFFFF" strokeWidth="1.5" strokeDasharray="7 7" fill="none" />
+                <path d="M110 0 L130 190" stroke="#E7DFCC" strokeWidth="10" fill="none" />
+                <circle cx="160" cy="70" r="15" fill="#E2711D" />
+                <circle cx="160" cy="70" r="6" fill="#FAF7EF" />
+                <text x="160" y="42" textAnchor="middle" fontSize="12" fontWeight="700" fill="#123B26" fontFamily="Mukta, sans-serif">सूर्यपुरा</text>
+                <text x="286" y="185" textAnchor="end" fontSize="10" fill="#6B7A6B" fontFamily="Mukta, sans-serif">सांगानेर →</text>
+                <text x="12" y="20" fontSize="10" fill="#6B7A6B" fontFamily="Mukta, sans-serif">↑ जयपुर</text>
+              </svg>
+              <p className="text-xs text-ink/50 text-center py-2.5 border-t border-brand-sand">अनुमानित स्थान — ग्राम पंचायत भवन के पास</p>
+            </div>
+          </div>
+
+          <form onSubmit={submit} className="lg:col-span-3 bg-white border border-brand-sand rounded-2xl p-6 md:p-8 shadow-sm" noValidate>
+            <h3 className="font-bold text-lg text-brand-green">संदेश भेजें</h3>
+            <p className="text-sm text-ink/55 mt-1">खाली जगह भरें — पंचायत कार्यालय शीघ्र जवाब देगा।</p>
+            <div className="mt-6 grid sm:grid-cols-2 gap-5">
+              <div>
+                <label htmlFor="c-name" className="block text-xs font-bold text-brand-green mb-1.5">आपका नाम *</label>
+                <input id="c-name" type="text" value={form.name} onChange={e => set('name', e.target.value)} placeholder="जैसे — रामेश्वर लाल" className={IN} />
+                {err.name && <p className="text-xs text-red-700 mt-1.5">{err.name}</p>}
+              </div>
+              <div>
+                <label htmlFor="c-phone" className="block text-xs font-bold text-brand-green mb-1.5">मोबाइल नंबर *</label>
+                <input id="c-phone" type="tel" inputMode="numeric" value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="10 अंकों का नंबर" className={IN} />
+                {err.phone && <p className="text-xs text-red-700 mt-1.5">{err.phone}</p>}
+              </div>
+            </div>
+            <div className="mt-5">
+              <label htmlFor="c-sub" className="block text-xs font-bold text-brand-green mb-1.5">विषय</label>
+              <select id="c-sub" value={form.subject} onChange={e => set('subject', e.target.value)} className={IN}>
+                <option>शिकायत / सुझाव</option>
+                <option>प्रमाण-पत्र संबंधी</option>
+                <option>योजना जानकारी</option>
+                <option>अन्य</option>
+              </select>
+            </div>
+            <div className="mt-5">
+              <label htmlFor="c-msg" className="block text-xs font-bold text-brand-green mb-1.5">आपका संदेश *</label>
+              <textarea id="c-msg" rows="4" value={form.msg} onChange={e => set('msg', e.target.value)} placeholder="अपनी बात यहां लिखें…" className={`${IN} resize-y`} />
+              {err.msg && <p className="text-xs text-red-700 mt-1.5">{err.msg}</p>}
+            </div>
+            <button type="submit"
+              className="mt-6 inline-flex items-center gap-2 bg-brand-saffron hover:bg-brand-saffronDark text-white font-bold px-7 py-3 rounded-xl shadow-lg shadow-brand-saffron/25 transition-colors">
+              संदेश भेजें <Icon name="send" size={16} />
+            </button>
+            <p className="mt-4 text-xs text-ink/45">* आवश्यक जानकारी — यह डेमो फॉर्म है, डेटा कहीं भेजा नहीं जाता।</p>
+          </form>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+function Footer({ goTo, notify }) {
+  const services = ['जन्म / मृत्यु पंजीकरण', 'भू-खसरा रिकॉर्ड', 'आय / निवास प्रमाण-पत्र', 'पेंशन आवेदन', 'मनरेगा जॉब कार्ड', 'शिकायत निवारण'];
+  return (
+    <footer className="bg-brand-deep text-white/75">
+      <div className="h-1 flex" aria-hidden="true">
+        <div className="flex-1 bg-brand-saffron" />
+        <div className="flex-1 bg-white" />
+        <div className="flex-1 bg-brand-leaf" />
+      </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8">
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.35fr_1fr_1fr_1.3fr]">
+          <div>
+            <div className="flex items-center gap-3">
+              <Emblem size={46} />
+              <div className="leading-tight">
+                <p className="font-display text-xl text-white">सूर्यपुरा</p>
+                <p className="text-[10px] tracking-[0.22em] font-semibold text-white/50 mt-1">ग्राम विकास पोर्टल</p>
+              </div>
+            </div>
+            <p className="mt-4 text-sm leading-relaxed text-white/60">
+              हमारा गांव, हमारा विकास, हमारी पहचान — गांव की सेवाएं, समाचार और विकास कार्य,
+              सब एक ही जगह।
+            </p>
+            <div className="mt-5">
+              <SocialIcons light notify={notify} />
+            </div>
+          </div>
+
+          <nav aria-label="फुटर लिंक">
+            <h4 className="text-sm font-bold text-white tracking-wider">पोर्टल लिंक</h4>
+            <ul className="mt-4 space-y-2.5 text-sm">
+              {NAV.map(n => (
+                <li key={n.id}>
+                  <button onClick={() => goTo(n.id)} className="text-white/60 hover:text-brand-saffronLight transition-colors inline-flex items-center gap-1.5 group">
+                    <span className="w-1 h-1 rounded-full bg-brand-saffron/60 group-hover:bg-brand-saffron transition-colors" />
+                    {n.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <div>
+            <h4 className="text-sm font-bold text-white tracking-wider">लोक सेवाएं</h4>
+            <ul className="mt-4 space-y-2.5 text-sm">
+              {services.map(s => (
+                <li key={s}>
+                  <button onClick={() => notify(`“${s}” सेवा इस डेमो पोर्टल में केवल प्रदर्शन हेतु सूचीबद्ध है।`)}
+                    className="text-white/60 hover:text-brand-saffronLight transition-colors inline-flex items-center gap-1.5 group">
+                    <span className="w-1 h-1 rounded-full bg-brand-saffron/60 group-hover:bg-brand-saffron transition-colors" />
+                    {s}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-sm font-bold text-white tracking-wider">संपर्क व खबरें</h4>
+            <ul className="mt-4 space-y-2.5 text-sm text-white/60">
+              <li className="flex gap-2.5 items-start"><Icon name="mapPin" size={14} className="text-brand-saffronLight shrink-0 mt-0.5" />पंचायत भवन, सूर्यपुरा, जिला जयपुर (राज.)</li>
+              <li className="flex gap-2.5 items-center"><Icon name="phone" size={14} className="text-brand-saffronLight shrink-0" />+91 94132 06514</li>
+              <li className="flex gap-2.5 items-center"><Icon name="mail" size={14} className="text-brand-saffronLight shrink-0" />gp.suryapura@example.in</li>
+            </ul>
+            <p className="mt-5 text-xs font-semibold text-white/50">गांव की खबरें सीधे ईमेल पर</p>
+            <form className="mt-2.5 flex gap-2"
+              onSubmit={e => {
+                e.preventDefault();
+                const v = e.target.elements.nlem.value.trim();
+                if (v.includes('@') && v.includes('.')) { notify('सब्सक्रिप्शन दर्ज (डेमो) — धन्यवाद!'); e.target.reset(); }
+                else notify('कृपया एक सही ईमेल पता लिखें।');
+              }}>
+              <input name="nlem" type="email" placeholder="आपका ईमेल" aria-label="ईमेल पता"
+                className="flex-1 min-w-0 bg-white/10 border border-white/20 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-brand-saffron transition" />
+              <button type="submit" aria-label="सब्सक्राइब करें"
+                className="bg-brand-saffron hover:bg-brand-saffronDark text-white rounded-xl px-4 flex items-center justify-center transition-colors shrink-0">
+                <Icon name="send" size={16} />
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div className="mt-10 pt-6 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-white/45">
+          <p>© 2026 ग्राम पंचायत सूर्यपुरा · जिला जयपुर, राजस्थान</p>
+          <p className="text-center">यह एक काल्पनिक डेमो पोर्टल है — शैक्षणिक प्रदर्शन हेतु निर्मित।</p>
+          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="inline-flex items-center gap-1.5 text-white/60 hover:text-white transition-colors">
+            ऊपर जाएं <Icon name="arrowUp" size={13} />
+          </button>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+/* ============================================================
+   APP
+   ============================================================ */
+function App() {
+  const [toast, setToast] = useState(null);
+  const timer = useRef(null);
+  const notify = msg => {
+    setToast(msg);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => setToast(null), 3200);
+  };
+
+  const [active, setActive] = useState('home');
+  const [newsIdx, setNewsIdx] = useState(null);
+  const [projIdx, setProjIdx] = useState(null);
+  const [agendaOpen, setAgendaOpen] = useState(false);
+  const [lightbox, setLightbox] = useState(null);
+  const [search, setSearch] = useState({ open: false, q: '' });
+  const [showTop, setShowTop] = useState(false);
+
+  const goTo = id => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setActive(id);
+  };
+
+  /* Scroll-spy for nav highlighting */
+  useEffect(() => {
+    const ids = [...new Set([...NAV.map(n => n.id), 'social'])];
+    const secs = ids.map(i => document.getElementById(i)).filter(Boolean);
+    if (!secs.length) return;
+    const obs = new IntersectionObserver(
+      entries => entries.forEach(e => { if (e.isIntersecting) setActive(e.target.id); }),
+      { rootMargin: '-35% 0px -60% 0px' }
+    );
+    secs.forEach(s => obs.observe(s));
+    return () => obs.disconnect();
+  }, []);
+
+  /* Back-to-top visibility */
+  useEffect(() => {
+    const h = () => setShowTop(window.scrollY > 600);
+    window.addEventListener('scroll', h, { passive: true });
+    h();
+    return () => window.removeEventListener('scroll', h);
+  }, []);
+
+  const navLightbox = d => setLightbox(l => (l ? { ...l, index: (l.index + d + l.list.length) % l.list.length } : l));
+
+  return (
+    <>
+      <TopStrip notify={notify} />
+      <Header goTo={goTo} onSearch={v => setSearch({ open: true, q: v })} notify={notify} active={active} />
+      <main>
+        <Hero goTo={goTo} />
+        <StatsBand />
+        <QuickAccess goTo={goTo} />
+        <News onOpen={setNewsIdx} />
+        <Village
+          onPlay={() => { notify('“गांव की झलक” डेमो में फोटो गैलरी के रूप में उपलब्ध है।'); goTo('gallery'); }}
+          onAgenda={() => setAgendaOpen(true)} />
+        <Projects onOpen={setProjIdx} />
+        <Shiksha onNews={() => setNewsIdx(2)} goTo={goTo} />
+        <Kisan notify={notify} />
+        <SocialFeed notify={notify} />
+        <Gallery onOpen={i => setLightbox({ list: GALLERY, index: i })} />
+        <Contact notify={notify} />
+      </main>
+      <Footer goTo={goTo} notify={notify} />
+
+      <BackToTop show={showTop} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
+      {toast && <Toast msg={toast} />}
+
+      <SearchOverlay open={search.open} q={search.q} setQ={v => setSearch(s => ({ ...s, q: v }))}
+        close={() => setSearch(s => ({ ...s, open: false }))} goTo={goTo} />
+      <NewsModal idx={newsIdx} onClose={() => setNewsIdx(null)} notify={notify} />
+      <ProjectModal idx={projIdx} onClose={() => setProjIdx(null)} goTo={goTo} />
+
+      <Modal open={agendaOpen} onClose={() => setAgendaOpen(false)} wide="max-w-lg" label="पंचायत बैठक कार्यसूची">
+        <div className="p-6 md:p-8">
+          <div className="flex items-center gap-3">
+            <span className="w-11 h-11 rounded-full bg-brand-green text-brand-saffronLight flex items-center justify-center shrink-0">
+              <Icon name="calendar" size={20} />
+            </span>
+            <div>
+              <p className="text-xs font-bold text-brand-saffron tracking-wider">ग्राम सभा · कार्यसूची</p>
+              <h3 className="font-display text-2xl text-brand-green">अगली पंचायत बैठक</h3>
+            </div>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <span className="text-xs font-semibold bg-brand-cream border border-brand-sand rounded-lg px-3 py-2 text-ink/70 flex items-center gap-1.5">
+              <Icon name="calendar" size={12} className="text-brand-saffron" /> 15 नवंबर 2026 · प्रातः 11:00
+            </span>
+            <span className="text-xs font-semibold bg-brand-cream border border-brand-sand rounded-lg px-3 py-2 text-ink/70 flex items-center gap-1.5">
+              <Icon name="mapPin" size={12} className="text-brand-saffron" /> पंचायत भवन, सूर्यपुरा
+            </span>
+          </div>
+          <ul className="mt-6 space-y-3">
+            {AGENDA.map((a, i) => (
+              <li key={i} className="flex gap-3 items-start bg-brand-cream rounded-xl p-3.5 border border-brand-sand">
+                <span className="w-6 h-6 rounded-full bg-brand-saffron text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span>
+                <p className="text-[15px] text-ink/80 leading-relaxed">{a}</p>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-5 text-xs text-ink/50">सभी ग्रामवासियों से निवेदन है कि वे समय पर उपस्थित हों। (डेमो सामग्री)</p>
+        </div>
+      </Modal>
+
+      <Lightbox data={lightbox} onClose={() => setLightbox(null)} onNav={navLightbox} />
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
